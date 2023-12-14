@@ -1,14 +1,4 @@
 /**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
@@ -52,6 +42,9 @@ import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "co
 // Images
 import brandWhite from "assets/images/logo-ct.png";
 import brandDark from "assets/images/logo-ct-dark.png";
+
+// for getting packageid in all pages
+import { PackageProvider } from "layouts/PackageContext";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -147,7 +140,8 @@ export default function App() {
   );
 
   return direction === "rtl" ? (
-    <CacheProvider value={rtlCache}>
+    <PackageProvider>
+      <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
         {layout === "dashboard" && (
@@ -155,7 +149,7 @@ export default function App() {
             <Sidenav
               color={sidenavColor}
               brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-              brandName="Material Dashboard 2"
+              brandName="Material Dashboard 1"
               routes={routes}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
@@ -170,8 +164,12 @@ export default function App() {
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </ThemeProvider>
-    </CacheProvider>
+      </CacheProvider>
+    </PackageProvider>
   ) : (
+
+    <PackageProvider>
+
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
       {layout === "dashboard" && (
@@ -179,7 +177,7 @@ export default function App() {
           <Sidenav
             color={sidenavColor}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-            brandName="Material Dashboard 2"
+            brandName="Rule Authoring Tool"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -191,8 +189,13 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/packages" />} />
+       
+        
       </Routes>
+    
     </ThemeProvider>
+    </PackageProvider>
+
   );
 }

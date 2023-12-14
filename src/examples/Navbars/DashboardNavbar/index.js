@@ -1,19 +1,10 @@
 /**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
 import { useState, useEffect } from "react";
+
 
 // react-router components
 import { useLocation, Link } from "react-router-dom";
@@ -36,6 +27,17 @@ import MDInput from "components/MDInput";
 import Breadcrumbs from "examples/Breadcrumbs";
 import NotificationItem from "examples/Items/NotificationItem";
 
+
+import MDButton from "components/MDButton";
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+
+import Box from '@mui/material/Box';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+
+
+
 // Custom styles for DashboardNavbar
 import {
   navbar,
@@ -53,12 +55,33 @@ import {
   setOpenConfigurator,
 } from "context";
 
-function DashboardNavbar({ absolute, light, isMini }) {
+
+// import for available packageid
+import { usePackage } from "layouts/PackageContext";
+import { PackageProvider } from "layouts/PackageContext";
+
+
+
+function DashboardNavbar({ absolute, light, isMini, packageid }) {
+  const [age, setAge] = useState('');
+  const {selectedPackageId, setPackageId} = usePackage();
+
+
+  const handlePackageChange = (event) => {
+    const packageId = event.target.value;
+    console.log('inside dashboard before', packageId);
+    setPackageId(packageId);
+    console.log('inside dashboard after', packageId);
+  };
+ 
+// console.log('packageid', packageid);
+
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator, darkMode } = controller;
   const [openMenu, setOpenMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
+
 
   useEffect(() => {
     // Setting the navbar type
@@ -104,9 +127,9 @@ function DashboardNavbar({ absolute, light, isMini }) {
       onClose={handleCloseMenu}
       sx={{ mt: 2 }}
     >
-      <NotificationItem icon={<Icon>email</Icon>} title="Check new messages" />
-      <NotificationItem icon={<Icon>podcasts</Icon>} title="Manage Podcast sessions" />
-      <NotificationItem icon={<Icon>shopping_cart</Icon>} title="Payment successfully completed" />
+      <NotificationItem icon={<Icon>email</Icon>} title="notif 1" />
+      <NotificationItem icon={<Icon>podcasts</Icon>} title="notif2" />
+      <NotificationItem icon={<Icon>shopping_cart</Icon>} title="notif3" />
     </Menu>
   );
 
@@ -124,6 +147,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   });
 
   return (
+    
     <AppBar
       position={absolute ? "absolute" : navbarType}
       color="inherit"
@@ -132,18 +156,64 @@ function DashboardNavbar({ absolute, light, isMini }) {
       <Toolbar sx={(theme) => navbarContainer(theme)}>
         <MDBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
           <Breadcrumbs icon="home" title={route[route.length - 1]} route={route} light={light} />
+          <MDButton size="small" variant="gradient" color="light">
+            Package -
+            <select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={selectedPackageId}
+              label="Package "
+              onChange={handlePackageChange}
+            >
+              <option value="p1id">Package1</option>
+              <option value="p2id">Package2</option>
+              <option value="p3id">Package3</option>
+            </select>
+
+          </MDButton>
+
+          
+        
         </MDBox>
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
             <MDBox pr={1}>
               <MDInput label="Search here" />
+
             </MDBox>
+
+            
             <MDBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in/basic">
+
+            
+
+                  
+           <Link to='packages'>
+           <MDButton size="small" variant="gradient" color="dark">
+              Templates
+              </MDButton>
+            </Link>
+           
+
+        &nbsp;
+        <Link to='/packages/rules'>
+        <MDButton size="small" variant="gradient" color="dark" >
+          Rules
+        </MDButton>
+        </Link>
+
+        
+
+
+        
+ 
+              {/* <Link to="/authentication/sign-in/basic">
                 <IconButton sx={navbarIconButton} size="small" disableRipple>
                   <Icon sx={iconsStyle}>account_circle</Icon>
+                  
                 </IconButton>
               </Link>
+
               <IconButton
                 size="small"
                 disableRipple
@@ -176,12 +246,13 @@ function DashboardNavbar({ absolute, light, isMini }) {
               >
                 <Icon sx={iconsStyle}>notifications</Icon>
               </IconButton>
-              {renderMenu()}
+              {renderMenu()} */}
             </MDBox>
           </MDBox>
         )}
       </Toolbar>
     </AppBar>
+   
   );
 }
 

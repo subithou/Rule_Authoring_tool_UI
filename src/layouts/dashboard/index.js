@@ -1,20 +1,12 @@
 /**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
 
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
 // @mui material components
 import Grid from "@mui/material/Grid";
+import Icon from "@mui/material/Icon";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -27,6 +19,18 @@ import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
 
+
+import MDButton from "components/MDButton";
+import Card from "@mui/material/Card";
+import DataTable from "examples/Tables/DataTable";
+import MDTypography from "components/MDTypography";
+
+import authorsTableData from "layouts/tables/data/authorsTableData";
+import projectsTableData from "layouts/tables/data/projectsTableData";
+const { columns, rows } = authorsTableData();
+  const { columns: pColumns, rows: pRows } = projectsTableData();
+
+
 // Data
 import reportsBarChartData from "layouts/dashboard/data/reportsBarChartData";
 import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
@@ -34,55 +38,123 @@ import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
 // Dashboard components
 import Projects from "layouts/dashboard/components/Projects";
 import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
+import { useState } from "react";
+
+import Example from "layouts/rules/Example";
+
+import { PackageProvider } from "layouts/PackageContext";
 
 function Dashboard() {
   const { sales, tasks } = reportsLineChartData;
 
+  const [showOperator, setShowOperator] = useState(false);
+  const [showAttributes, setShowAttributes] = useState(false);
+  const [showActions, setShowActions] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
+  const [showTemplate, setShowTemplate] = useState(true);
+  const [showRule, setShowRule] = useState(false);
+
+  const OpenOperator = () => {
+    setShowOperator(true);
+    setShowActions(false);
+    setShowAttributes(false);
+    setShowOverview(false);
+  }
+  const OpenAttributes = () => {
+    setShowOperator(false);
+    setShowActions(false);
+    setShowAttributes(true);
+    setShowOverview(false);
+  }
+  const OpenActions = () => {
+    setShowOperator(false);
+    setShowActions(true);
+    setShowAttributes(false);
+    setShowOverview(false);
+  }
+
+  const OpenOverview = () => {
+    setShowOperator(false);
+    setShowActions(false);
+    setShowAttributes(false);
+    setShowOverview(true);
+  }
+
   return (
+    
     <DashboardLayout>
-      <DashboardNavbar />
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+      <DashboardNavbar packageid="123" />
+      <MDBox py={3}> 
+         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
+            <MDBox mb={1}>
+               
               <ComplexStatisticsCard
                 color="dark"
-                icon="weekend"
-                title="Bookings"
-                count={281}
-                percentage={{
-                  color: "success",
-                  amount: "+55%",
-                  label: "than lask week",
-                }}
+                icon="equalizer"
+                title={<MDButton size="small" variant="outlined" color="success" onClick={OpenOperator}>
+                {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
+                view
+              </MDButton>}
+                count={"Operators"}
+                percentage={{color: "success",
+                amount: "",
+                label: "Manage all the operators",
+                
+              }}
+              onClick={OpenOperator}
+              
               />
+                
+                
             </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
+            <MDBox mb={1}>
               <ComplexStatisticsCard
                 icon="leaderboard"
-                title="Today's Users"
-                count="2,300"
+                title={<MDButton size="small" variant="outlined" color="success" onClick={OpenAttributes}>
+                {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
+                view
+              </MDButton>}
+                count="Attributes"
                 percentage={{
                   color: "success",
-                  amount: "+3%",
-                  label: "than last month",
+                  amount: "",
+                  label: "Manage all the attributes",
                 }}
               />
             </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
+            {/* <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 color="success"
                 icon="store"
-                title="Revenue"
-                count="34k"
+                title="Manage"
+                count="Actions"
                 percentage={{
                   color: "success",
-                  amount: "+1%",
-                  label: "than yesterday",
+                  amount: "",
+                  label: <MDButton size="small" variant="outlined" color="success">
+                  Templates
+                </MDButton>,
+                }}
+              />
+            </MDBox> */}
+            <MDBox mb={1}>
+              <ComplexStatisticsCard
+                color="success"
+                icon="store"
+                title={<MDButton size="small" variant="outlined" color="success" onClick={OpenActions}>
+                {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
+                view
+              </MDButton>}
+                count="Actions"
+                percentage={{
+                  color: "success",
+                  amount: "",
+                  label: "Manage all the actions",
                 }}
               />
             </MDBox>
@@ -91,19 +163,27 @@ function Dashboard() {
             <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 color="primary"
-                icon="person_add"
-                title="Followers"
-                count="+91"
+                icon="preview"
+                title={<MDButton size="small" variant="outlined" color="success" onClick={OpenOverview}>
+                {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
+                view
+              </MDButton>}
+                count="Overview"
                 percentage={{
                   color: "success",
                   amount: "",
-                  label: "Just updated",
+                  label: "actions,operators, attributes",
                 }}
               />
             </MDBox>
           </Grid>
-        </Grid>
-        <MDBox mt={4.5}>
+        </Grid> 
+        <div>
+     
+        </div>
+
+        
+         {/* <MDBox mt={4.5}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={4}>
               <MDBox mb={3}>
@@ -143,8 +223,9 @@ function Dashboard() {
               </MDBox>
             </Grid>
           </Grid>
-        </MDBox>
-        <MDBox>
+        </MDBox>  */}
+
+         {/* <MDBox>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={8}>
               <Projects />
@@ -153,10 +234,231 @@ function Dashboard() {
               <OrdersOverview />
             </Grid>
           </Grid>
-        </MDBox>
+        </MDBox> */}
+       </MDBox>
+       {showOperator? (
+        <MDBox pt={3} pb={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Operators Table
+                  
+                </MDTypography>
+
+                
+              </MDBox>
+              <MDBox pt={3}>
+                <DataTable
+                  table={{ columns, rows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
+          </Grid>
+
+          
+        </Grid>
       </MDBox>
-      <Footer />
+       ): null}
+       {showAttributes? (
+        <MDBox pt={3} pb={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Attributes Table
+                  
+                </MDTypography>
+
+                
+              </MDBox>
+              <MDBox pt={3}>
+                <DataTable
+                  table={{ columns, rows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
+          </Grid>
+
+          
+        </Grid>
+      </MDBox>
+       ): null}
+       {showActions? (
+        <MDBox pt={3} pb={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Actions Table
+                  
+                </MDTypography>
+
+                
+              </MDBox>
+              <MDBox pt={3}>
+                <DataTable
+                  table={{ columns, rows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
+          </Grid>
+
+          
+        </Grid>
+      </MDBox>
+       ): null}
+       {showOverview? (
+        <MDBox pt={3} pb={3}>
+          <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Operator Table
+                  
+                </MDTypography>
+
+                
+              </MDBox>
+              <MDBox pt={3}>
+                <DataTable
+                  table={{ columns, rows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Attributes Table
+                  
+                </MDTypography>
+
+                
+              </MDBox>
+              <MDBox pt={3}>
+                <DataTable
+                  table={{ columns, rows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Card>
+              <MDBox
+                mx={2}
+                mt={-3}
+                py={3}
+                px={2}
+                variant="gradient"
+                bgColor="info"
+                borderRadius="lg"
+                coloredShadow="info"
+              >
+                <MDTypography variant="h6" color="white">
+                  Action Table
+                  
+                </MDTypography>
+
+                
+              </MDBox>
+              <MDBox pt={3}>
+                <DataTable
+                  table={{ columns, rows }}
+                  isSorted={false}
+                  entriesPerPage={false}
+                  showTotalEntries={false}
+                  noEndBorder
+                />
+              </MDBox>
+            </Card>
+          </Grid>
+
+          
+
+          
+        </Grid>
+        
+      </MDBox>
+      
+       ): null}
+
+       
+     {/* <Footer />  */}
     </DashboardLayout>
+  
   );
 }
 

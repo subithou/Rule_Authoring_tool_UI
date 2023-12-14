@@ -485,3 +485,78 @@ export default DataTable;
                   />
 --------------------------------------------
 
+const [conditionData, setConditionData] = useState([]);
+
+// Function to add a new condition for a specific row
+const addCondition = (rowId, conditionName) => {
+  setConditionData((prevData) => [
+    ...prevData,
+    { rowId, conditionName, operator: "", value: "" },
+  ]);
+};
+
+// Function to handle operator selection for a specific row
+const handleOperatorChange = (rowId, conditionName, operator) => {
+  setConditionData((prevData) =>
+    prevData.map((item) =>
+      item.rowId === rowId && item.conditionName === conditionName
+        ? { ...item, operator }
+        : item
+    )
+  );
+};
+
+// Function to handle value selection for a specific row
+const handleValueChange = (rowId, conditionName, value) => {
+  setConditionData((prevData) =>
+    prevData.map((item) =>
+      item.rowId === rowId && item.conditionName === conditionName
+        ? { ...item, value }
+        : item
+    )
+  );
+};
+
+
+
+
+const dynamicColumns = useMemo(() => {
+  const baseColumns = [
+    { Header: "ID", accessor: "id", width: "15%" },
+  ];
+
+  // Add columns for conditions dynamically
+  const dynamicColumns = conditions.map((condition) => ({
+    Header: condition,
+    accessor: condition,
+    width: "20%",
+    Cell: ({ row }) => (
+      <div>
+        <select
+          value={conditionData.find(
+            (item) => item.rowId === row.original.id && item.conditionName === condition
+          )?.operator || ""}
+          onChange={(e) =>
+            handleOperatorChange(row.original.id, condition, e.target.value)
+          }
+        >
+          <option value="">Select Operator</option>
+          <option value="equals">Equals</option>
+          <option value="contains">Contains</option>
+          {/* Add more operators as needed */}
+        </select>
+        <input
+          type="text"
+          value={conditionData.find(
+            (item) => item.rowId === row.original.id && item.conditionName === condition
+          )?.value || ""}
+          onChange={(e) =>
+            handleValueChange(row.original.id, condition, e.target.value)
+          }
+        />
+      </div>
+    ),
+  }));
+
+  return [...baseColumns, ...dynamicColumns];
+}, [conditions, conditionData]);

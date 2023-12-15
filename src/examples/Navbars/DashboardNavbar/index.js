@@ -165,8 +165,9 @@ function DashboardNavbar({ absolute, light, isMini, packageid }) {
               label="Package "
               onChange={handlePackageChange}
             >
-              <option value="p1id">Package1</option>
-              <option value="p2id">Package2</option>
+              <option value="0" disabled selected>Select Package</option>
+              <option value="1702665896795">CTS-Package-Demo</option>
+              <option value="1701338667074">PackageTestFinal1</option>
               <option value="p3id">Package3</option>
             </select>
 

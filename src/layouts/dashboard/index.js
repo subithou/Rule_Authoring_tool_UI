@@ -43,9 +43,22 @@ import { useState } from "react";
 import Example from "layouts/rules/Example";
 
 import { PackageProvider } from "layouts/PackageContext";
+import { usePackage } from "layouts/PackageContext";
+
+// api for operators
+import { addOperators, createOperators, deleteOperators, getOperators } from "API/OperatorsAPI";
+
+import MDInput from "components/MDInput";
 
 function Dashboard() {
   const { sales, tasks } = reportsLineChartData;
+
+
+  // for available packageid
+  const  {selectedPackageId} = usePackage();
+  console.log(selectedPackageId, 'inside actual dashboard');
+
+
 
   const [showOperator, setShowOperator] = useState(false);
   const [showAttributes, setShowAttributes] = useState(false);
@@ -54,11 +67,28 @@ function Dashboard() {
   const [showTemplate, setShowTemplate] = useState(true);
   const [showRule, setShowRule] = useState(false);
 
-  const OpenOperator = () => {
+  const OpenOperator = async() => {
     setShowOperator(true);
     setShowActions(false);
     setShowAttributes(false);
     setShowOverview(false);
+    try {
+
+      const response = await getOperators(selectedPackageId);
+      console.log(response.data);
+      if (response.data.Operators.length > 0) {
+        setOperatorTableData([]);
+        
+        let responseOperator = response.data.Operators;
+        {responseOperator.map((operator) => {
+          setOperatorTableData((prevData) => [...prevData, operator]);
+        })}
+        console.log(operatorTableData,'op table data', response.data.Operators)
+      }
+    }catch(error){
+      console.log(error, 'while fetching operator')
+    }
+
   }
   const OpenAttributes = () => {
     setShowOperator(false);
@@ -79,6 +109,9 @@ function Dashboard() {
     setShowAttributes(false);
     setShowOverview(true);
   }
+
+  const [operatorTableData, setOperatorTableData] = useState([]);
+  const [showAddOperator, setShowAddOperator] = useState(false);
 
   return (
     
@@ -251,21 +284,86 @@ function Dashboard() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
+                <MDTypography variant="h6" color="white" display="flex" justifyContent="space-between">
                   Operators Table
+
+                  <MDBox display="flex" justifyContent="flex-end">
+              <MDButton size="small" variant="outlined" color="white"
+                    onClick={() => setShowAddOperator(true)}
+                    >
+                    Add Operator
+                  </MDButton>
+              </MDBox>
                   
                 </MDTypography>
 
                 
               </MDBox>
+            
+
+            {showAddOperator && (
+              
+                  <div>
+                  <br/>
+                  <MDBox  mx={2}
+                mt={-3}
+                py={3}
+                px={2} display="flex">
+
+                  <MDInput type="text" label="Name" value="" onChange="" /> 
+        
+                  <MDInput type="text" label="Description" value="" onChange=""  /> 
+
+                  <MDBox display="flex" justifyContent="flex-end">
+                    
+                  <MDButton size="small" variant="gradient" color="info"
+                    onClick="">
+                    Add
+                  </MDButton>
+                 
+                  
+                  {/* </Link> */}
+                  
+        
+                  <MDButton size="small" variant="gradient" color="info"
+                    onClick={()=> setShowAddOperator(false)}>
+                    Cancel
+                  </MDButton>
+                  </MDBox>
+                  </MDBox>
+                  
+        
+        
+                </div>
+              
+                )}
+
+            
               <MDBox pt={3}>
-                <DataTable
+                {/* <DataTable
                   table={{ columns, rows }}
                   isSorted={false}
                   entriesPerPage={false}
                   showTotalEntries={false}
                   noEndBorder
-                />
+                /> */}
+                
+                <DataTable
+                table={{
+                  columns: [
+                    { Header: "ID", accessor: "operatorid", width: "15%" },
+                    { Header: "Name", accessor: "operatorname", width: "20%" },
+                    { Header: "Value", accessor: "operatorvalue", width: "20%" },
+                    // { Header: "Actions", accessor: "actions", width: "25%", Cell: ActionsColumn },
+                    // { Header: "age", accessor: "age", width: "12%" },
+                  ],
+                  rows: operatorTableData }}
+
+                  // onRowClick={(rowData) => {
+                  //   // Handle row click, e.g., navigate to a detail page
+                  //   console.log("Row Clicked:", rowData);
+                  // }}
+                  />
               </MDBox>
             </Card>
           </Grid>

@@ -82,17 +82,25 @@ function Tables() {
     setInputDescription(event.target.value);
   }
 
+  const [currentrule, setCurrentRule] = useState('');
+
   const addLinearName = async(event) => {
     event.preventDefault();
     if (inputName && inputDescription) {
-      setTableData((prevData) => [...prevData, { id: String(Date.now()), name: inputName, description: inputDescription }])
-      
+      let rule_id = String(Date.now())
+      setTableData((prevData) => [...prevData, { id: rule_id , name: inputName, description: inputDescription }])
+      setCurrentRule(rule_id);
+
       setInputName('');
       setInputDescription('');
       setShowAddLinearName(false);
       setShowLinearRule(true);
     }
   }
+
+  // current rule and display rule data
+
+
 
   const handleCellEdit = (rowData, columnId, value) => {
     // Handle cell edit logic here
@@ -156,18 +164,38 @@ function Tables() {
   };
 
   // Function to handle operator selection
-  const handleOperatorChange = (conditionName, operator) => {
+  // const handleOperatorChange = (conditionName, operator) => {
+  //   setConditionData((prevData) => ({
+  //     ...prevData,
+  //     [conditionName]: { ...prevData[conditionName], operator },
+  //   }));
+  // };
+  const handleOperatorChange = (conditionName, rowId, operator) => {
+    console.log(operator, 'operator')
     setConditionData((prevData) => ({
       ...prevData,
-      [conditionName]: { ...prevData[conditionName], operator },
+      [rowId]: {
+        ...prevData[rowId],
+        [conditionName]: { ...prevData[rowId]?.[conditionName], operator },
+      },
     }));
   };
 
   // Function to handle value selection
-  const handleValueChange = (conditionName, value) => {
+  // const handleValueChange = (conditionName, value) => {
+  //   setConditionData((prevData) => ({
+  //     ...prevData,
+  //     [conditionName]: { ...prevData[conditionName], value },
+  //   }));
+  // };
+  const handleValueChange = (conditionName, rowId, value) => {
+    console.log(value,rowId, 'value')
     setConditionData((prevData) => ({
       ...prevData,
-      [conditionName]: { ...prevData[conditionName], value },
+      [rowId]: {
+        ...prevData[rowId],
+        [conditionName]: { ...prevData[rowId]?.[conditionName], value },
+      },
     }));
   };
   const availableConditions = ["ConditionName1", "ConditionName2", "ConditionName3"];
@@ -187,47 +215,142 @@ function Tables() {
     }
   };
   
+  // const dynamicColumns = useMemo(() => {
+  //   const baseColumns = [
+  //     { Header: "ID", accessor: "id", width: "15%" },
+      
+  //   ];
+
+  //   // Add columns for conditions dynamically
+  //   const dynamicColumns = conditions.map((condition) => ({
+  //     Header: condition,
+  //     accessor: condition,
+  //     width: "20%",
+  //     Cell: ({ row }) => (
+  //       <div>
+  //         <select
+  //           value={conditionData[row.original.id]?.[condition]?.operator || ""}
+  //           onChange={(e) => handleOperatorChange(condition, row.original.id, e.target.value)}
+  //         >
+  //           <option value="">Select Operator</option>
+  //           <option value="equals">Equals</option>
+  //           <option value="contains">Contains</option>
+  //           {/* Add more operators as needed */}
+  //         </select>
+  //         <input
+  //           type="text"
+  //           value={conditionData[row.original.id]?.[condition]?.value || ""}
+  //           onChange={(e) => handleValueChange(condition, row.original.id, e.target.value)}
+  //         />
+  //       </div>
+  //     ),
+  //   }));
+
+  //   return [...baseColumns, ...dynamicColumns];
+  // }, [conditions, conditionData]);
+
   const dynamicColumns = useMemo(() => {
     const baseColumns = [
       { Header: "ID", accessor: "id", width: "15%" },
-      
+      // ... Other columns
+      { Header: "Delete", accessor: "delete", width: "15%", Cell: DeleteColumn },
     ];
-
-    // Add columns for conditions dynamically
+  
     const dynamicColumns = conditions.map((condition) => ({
       Header: condition,
       accessor: condition,
-      width: "20%",
+      width: "15%",
       Cell: ({ row }) => (
         <div>
           <select
-            value={conditionData[condition]?.operator || ""}
-            onChange={(e) => handleOperatorChange(condition, e.target.value)}
+            value={conditionData[row.original.id]?.[condition]?.operator || ""}
+            onChange={(e) =>
+              handleOperatorChange(condition, row.original.id, e.target.value)
+            }
           >
             <option value="">Select Operator</option>
             <option value="equals">Equals</option>
-            <option value="contains">Contains</option>
-            {/* Add more operators as needed */}
+             <option value="contains">Contains</option>
           </select>
           <input
             type="text"
-            value={conditionData[condition]?.value || ""}
-            onChange={(e) => handleValueChange(condition, e.target.value)}
+            value={conditionData[row.original.id]?.[condition]?.value || ""}
+            onChange={(e) =>
+              handleValueChange(condition, row.original.id, e.target.value)
+            }
           />
         </div>
       ),
     }));
 
+  
     return [...baseColumns, ...dynamicColumns];
   }, [conditions, conditionData]);
 
+  
+
+  //   return [...baseColumns, ...dynamicColumns];
+  // }, [conditions, conditionData]);
+
 
   // new row setups
+  // const addRowToDataTable1 = () => {
+  //   const newRow = {
+  //     id: String(Date.now()), // Unique ID for each row
+  //     // name: `New Row ${linearRuleData.length + 1}`,
+  //     // description: `Description ${linearRuleData.length + 1}`,
+  //   };
+  
+  //   // Include conditions data for the new row
+  //   conditions.forEach((condition) => {
+  //     newRow[condition] = {
+  //       operator: conditionData[condition]?.operator || "",
+  //       value: conditionData[condition]?.value || "",
+  //     };
+  //   });
+  
+  //   setLinearRuleData((prevData) => [...prevData, newRow]);
+  //   resetConditionData(); // Reset conditionData after adding a new row
+  // };
+
+  // const addRowToDataTable1 = () => {
+  //   const newRow = {
+  //     id: String(Date.now()), // Unique ID for each row
+  //     // name: `New Row ${linearRuleData.length + 1}`,
+  //     // description: `Description ${linearRuleData.length + 1}`,
+  //   };
+  
+  //   // Include conditions data for the new row
+  //   conditions.forEach((condition) => {
+  //     newRow[condition] = {
+  //       operator: conditionData[condition]?.operator || "",
+  //       value: conditionData[condition]?.value || "",
+  //     };
+  //   });
+  
+  //   setLinearRuleData((prevData) => [...prevData, newRow]);
+  //   resetConditionData(); // Reset conditionData after adding a new row
+  // };
+
+  // const addRowToDataTable1 = () => {
+  //   const newRow = {
+  //     id: String(Date.now()), // Unique ID for each row
+  //   };
+  
+  //   // Include conditions data for the new row
+  //   conditions.forEach((condition) => {
+  //     newRow[condition] = {
+  //       operator: conditionData[newRow.id]?.[condition]?.operator || "",
+  //       value: conditionData[newRow.id]?.[condition]?.value || "",
+  //     };
+  //   });
+  
+  //   setLinearRuleData((prevData) => [...prevData, newRow]);
+  //   resetConditionData(); // Reset conditionData after adding a new row
+  // };
   const addRowToDataTable1 = () => {
     const newRow = {
       id: String(Date.now()), // Unique ID for each row
-      // name: `New Row ${linearRuleData.length + 1}`,
-      // description: `Description ${linearRuleData.length + 1}`,
     };
   
     // Include conditions data for the new row
@@ -238,9 +361,17 @@ function Tables() {
       };
     });
   
+    // Include actions data for the new row
+    actionData.forEach((action) => {
+      newRow[action] = "";
+    });
+  
     setLinearRuleData((prevData) => [...prevData, newRow]);
-    resetConditionData(); // Reset conditionData after adding a new row
+    // resetConditionData(); // Reset conditionData after adding a new row
   };
+  
+  
+  
   
   // Function to reset conditionData
   const resetConditionData = () => {
@@ -266,6 +397,86 @@ function Tables() {
       setSelectedAction("");
     }
   };
+
+  console.log(columns, linearRuleData, 'table data linear ')
+
+  // Function to get all data with conditions and actions
+const getAllTableData = () => {
+  const allData = linearRuleData.map((row) => {
+    const rowData = { ...row };
+
+    // Add conditions data for the row
+    conditions.forEach((condition) => {
+      rowData[condition] = {
+        operator: conditionData[row.id]?.[condition]?.operator || "",
+        value: conditionData[row.id]?.[condition]?.value || "",
+      };
+    });
+
+    // Add actions data for the row
+    actionData.forEach((action) => {
+      rowData[action] = row[action] || "";
+    });
+
+    return rowData;
+  });
+
+  return allData;
+};
+
+// final rule data and main rule id's
+// Usage:
+const [finalLR, setFinalLR] = useState([]);
+
+const handleSave = () => {
+  const allData = getAllTableData();
+
+  setFinalLR((prevData) => [...prevData, {LRId: currentrule, rule: allData}])
+  console.log("All Table Data:", allData);
+  console.log("All Table Data along with rule id", finalLR);
+
+  setShowLinearRule(false);
+  // You can perform further actions with the combined data
+};
+
+
+function DeleteColumn({ row }) {
+  return (
+    <MDBox
+      onClick={() => handleDeleteRow(row.original.id)}
+      style={{ cursor: "pointer" }}
+    >
+      delete
+    </MDBox>
+  );
+}
+
+// ...
+
+function handleDeleteRow(rowId) {
+  // Implement your delete logic here
+  // For conditions table
+  const updatedConditions = conditions.filter((condition) => condition !== rowId);
+  setConditions(updatedConditions);
+
+  // For conditionData
+  const updatedConditionData = { ...conditionData };
+  delete updatedConditionData[rowId];
+  setConditionData(updatedConditionData);
+
+  // For actions table
+  const updatedActions = actionData.filter((action) => action !== rowId);
+  setActionData(updatedActions);
+
+  // For linearRuleData
+  const updatedLinearRuleData = linearRuleData.filter((row) => row.id !== rowId);
+  setLinearRuleData(updatedLinearRuleData);
+}
+
+// ...
+
+
+
 
   return (
     
@@ -393,7 +604,7 @@ function Tables() {
                   </MDButton>
                   &nbsp;&nbsp;
                   <MDButton size="small" variant="gradient" color="success"
-                    onClick={() => setShowLinearRule(false)}>
+                    onClick={handleSave}>
                     Save
                   </MDButton>
                   &nbsp;
@@ -432,7 +643,7 @@ function Tables() {
                         rows: linearRuleData,
                       }}
                     /> */}
-                    <DataTable1
+                    {/* <DataTable1
                 table={{
                   columns: [
                     ...dynamicColumns,
@@ -460,7 +671,145 @@ function Tables() {
                   rows: linearRuleData,
                 }}
               />
+               */}
+
+                    {/* <DataTable1
+                      table={{
+                        columns: [
+                          ...dynamicColumns,
+                          ...actionData.map((action) => ({
+                            Header: action,
+                            accessor: action,
+                            width: "20%",
+                            Cell: ({ row }) => (
+                              <input
+                                type="text"
+                                value={row.original[action] || ""}
+                                onChange={(e) => {
+                                  // Handle input change and update the data
+                                  const newData = [...linearRuleData];
+                                  const rowIndex = linearRuleData.findIndex(
+                                    (item) => item.id === row.original.id
+                                  );
+                                  newData[rowIndex][action] = e.target.value;
+                                  setLinearRuleData(newData);
+                                }}
+                              />
+                            ),
+                          })),
+                        ],
+                        rows: linearRuleData,
+                      }}
+                    /> */}
+
+{/* 
+<DataTable1
+  table={{
+    columns: [
+      ...dynamicColumns,
+      ...actionData.map((action) => ({
+        Header: action,
+        accessor: action,
+        width: "20%",
+        Cell: ({ row }) => (
+          <input
+            type="text"
+            value={row.original[action] || ""}
+            onChange={(e) => {
+              // Handle input change and update the data
+              const newData = [...linearRuleData];
+              const rowIndex = linearRuleData.findIndex(
+                (item) => item.id === row.original.id
+              );
+              newData[rowIndex] = {
+                ...newData[rowIndex],
+                [action]: e.target.value,
+              };
+              setLinearRuleData(newData);
+            }}
+          />
+        ),
+      })),
+    ],
+    rows: linearRuleData,
+  }}
+/> */}
+
+{/* <DataTable1
+  table={{
+    columns: [
+      ...dynamicColumns,
+      ...actionData.map((action) => ({
+        Header: action,
+        accessor: action,
+        width: "20%",
+        Cell: ({ row }) => (
+          <input
+            type="text"
+            value={row.original[action] || ""}
+            onChange={(e) => {
+              // Handle input change and update the data
+              const newData = [...linearRuleData];
+              const rowIndex = linearRuleData.findIndex(
+                (item) => item.id === row.original.id
+              );
+              newData[rowIndex] = {
+                ...newData[rowIndex],
+                [action]: e.target.value,
+              };
+              setLinearRuleData([...newData]); // Use the spread operator to ensure a new reference
+            }}
+          />
+        ),
+      })),
+    ],
+    rows: linearRuleData,
+  }}
+/> */}
+
+<DataTable1
+  table={{
+    columns: [
+      ...dynamicColumns,
+      ...actionData.map((action) => ({
+        Header: action,
+        accessor: action,
+        width: "20%",
+        Cell: ({ row }) => (
+          <input
+            type="text"
+            value={row.original[action] || ""}
+            onChange={(e) => {
+              // Handle input change and update the data
+              const newData = [...linearRuleData];
+              const rowIndex = linearRuleData.findIndex(
+                (item) => item.id === row.original.id
+              );
+
+              newData[rowIndex] = {
+                ...newData[rowIndex],
+                [action]: e.target.value,
+              };
+
+              setLinearRuleData(newData); // Update the state with the new array
+            }}
+          />
+        ),
+      })),
+    ],
+    rows: linearRuleData,
+  }}
+/>
+
+
+{/* <div>
+  <p>{linearRuleData}</p>
+  </div> */}
+
                   </div>
+
+
+                  
 
                   
 
@@ -476,7 +825,9 @@ function Tables() {
                 /> */}
                 </MDBox>
               </Card>
+
             </Grid>
+
 
 
           )}

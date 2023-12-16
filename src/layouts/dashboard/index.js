@@ -48,7 +48,21 @@ import { usePackage } from "layouts/PackageContext";
 // api for operators
 import { addOperators, createOperators, deleteOperators, getOperators } from "API/OperatorsAPI";
 
+// api for attributes
+import { createVariables, deleteVariables, getVariables } from "API/AttributesAPI";
+
 import MDInput from "components/MDInput";
+
+
+// select
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import Box from '@mui/material/Box';
+
+// notification
+import MDSnackbar from "components/MDSnackbar";
 
 function Dashboard() {
   const { sales, tasks } = reportsLineChartData;
@@ -68,6 +82,7 @@ function Dashboard() {
   const [showRule, setShowRule] = useState(false);
 
   const OpenOperator = async() => {
+    setOperatorTableData([]);
     setShowOperator(true);
     setShowActions(false);
     setShowAttributes(false);
@@ -77,7 +92,7 @@ function Dashboard() {
       const response = await getOperators(selectedPackageId);
       console.log(response.data);
       if (response.data.Operators.length > 0) {
-        setOperatorTableData([]);
+       
         
         let responseOperator = response.data.Operators;
         {responseOperator.map((operator) => {
@@ -87,15 +102,14 @@ function Dashboard() {
       }
     }catch(error){
       console.log(error, 'while fetching operator')
+
     }
 
   }
-  const OpenAttributes = () => {
-    setShowOperator(false);
-    setShowActions(false);
-    setShowAttributes(true);
-    setShowOverview(false);
-  }
+
+  
+
+
   const OpenActions = () => {
     setShowOperator(false);
     setShowActions(true);
@@ -112,6 +126,204 @@ function Dashboard() {
 
   const [operatorTableData, setOperatorTableData] = useState([]);
   const [showAddOperator, setShowAddOperator] = useState(false);
+  
+
+
+
+  //select operator
+  const [selectedOperator, setSelectedOperator] = useState('');
+
+  const handleChangeOperator = (event) => {
+    setSelectedOperator(event.target.value);
+  };
+  const allOperators = [
+    {
+      name:"Lessthan",
+      value: "<"
+    },
+    {
+      name: "Greaterthan",
+      value: ">"
+    },
+    {
+      name: "NOT EQUAL",
+      value: "!="
+    },
+    {
+      name: "EQUAL",
+      value: "="
+    }
+  ]
+// success notification 
+const [successSB, setSuccessSB] = useState(false);
+const closeSuccessSB = () => setSuccessSB(false);
+
+
+
+const renderSuccessSB = (
+  <MDSnackbar
+    color="success"
+    icon="check"
+    title="Successs"
+    content=""
+    dateTime="11 mins ago"
+    open={successSB}
+    onClose={closeSuccessSB}
+    close={closeSuccessSB}
+    bgWhite
+  />
+);
+
+//error notification
+const [errorSB, setErrorSB] = useState(false);
+  const closeErrorSB = () => setErrorSB(false);
+
+const renderErrorSB = (
+  <MDSnackbar
+    color="error"
+    icon="warning"
+    title="Error"
+    content="This is a notification message"
+    dateTime=""
+    open={errorSB}
+    onClose={closeErrorSB}
+    close={closeErrorSB}
+    bgWhite
+  />
+);
+
+  // adding operator function
+
+  const handleAddOperator = async() => {
+    if(selectedOperator){
+      try {
+        let opName = '';
+        { allOperators.map((item) => {
+          if(selectedOperator === item.value){
+            opName = item.name
+          }
+        })}
+        
+
+        const response = await addOperators({packageid:String(selectedPackageId), packagename:"CTS-Package-Demo", operators:[
+          
+          {
+            operatorid: String(Date.now()),
+            operatorname: opName,
+            operatorvalue: selectedOperator
+          }
+        ]
+      })
+      console.log(response, 'insert one operator succe');
+      setShowAddOperator(false);
+      OpenOperator();
+      setSuccessSB(true);
+
+
+      }catch(error){
+        console.log(error, 'error in adding an operator')
+        setErrorSB(true)
+      }
+      
+    }
+    setSelectedOperator('');
+  }
+
+  const handleCancelAddOperator = async() => {
+    setShowAddOperator(false);
+    setSelectedOperator('');
+    
+  }
+  // const op = allOperators.map((option) =>{
+
+  // })
+
+  // for attributes managing
+  const [attributesTableData, setAttributesTableData] = useState([]);
+  const OpenAttributes = async() => {
+    setAttributesTableData([]);
+
+    setShowOperator(false);
+    setShowActions(false);
+    setShowAttributes(true);
+    setShowOverview(false);
+    try{
+      const response = await getVariables(selectedPackageId);
+      console.log(response, 'get attributes')
+      if (response.data.item.length > 0) {
+
+        let responseAttributes = response.data.item;
+        {responseAttributes.map((attributes) => {
+          setAttributesTableData((prevData) => [...prevData, attributes]);
+        })}
+        console.log(attributesTableData,'attri table data', response.data.item)
+      }
+    }catch(error){
+      console.log(error, 'error in get attributes')
+    }
+  }
+
+const [showAddAttributes, setShowAddAttributes] = useState(false);
+
+
+// select attribute name,type,values
+const [attributeName, setAttributeName] = useState('');
+const handleAttributeName = (event) => {
+  setAttributeName(event.target.value)
+}
+
+const [attributeValue, setAttributeValue] = useState('');
+const handleAttributeValue = (event) => {
+  setAttributeValue(event.target.value)
+}
+
+const [selectedAttribute, setSelectedAttribute] = useState('');
+const handleSelectedAttribute = (event) => {
+  setSelectedAttribute(event.target.value);
+}
+
+const handleAddAttribute = async() => {
+  if(selectedAttribute, attributeName, attributeValue){
+    try {
+      
+      
+      const response = await createVariables({packageid:String(selectedPackageId), item: [{
+        id: String(Date.now()),
+        name: attributeName,
+        values: attributeValue
+      }] })
+      
+   
+    console.log(response, 'insert one attribute succe');
+    setShowAddAttributes(false);
+    OpenAttributes();
+    setSuccessSB(true);
+
+
+    }catch(error){
+      console.log(error, 'error in adding an attributes')
+      setErrorSB(true)
+    }
+
+    setAttributeName('');
+    setAttributeValue('');
+    setSelectedAttribute('');
+
+    
+  }
+}
+
+const handleCancelAddAttribute = async() => {
+  setShowAddAttributes(false);
+  
+  setAttributeName('');
+    setAttributeValue('');
+    setSelectedAttribute('');
+  
+}
+
+
+  
 
   return (
     
@@ -269,6 +481,8 @@ function Dashboard() {
           </Grid>
         </MDBox> */}
        </MDBox>
+       {renderSuccessSB}
+       {renderErrorSB}
        {showOperator? (
         <MDBox pt={3} pb={3}>
         <Grid container spacing={6}>
@@ -308,28 +522,87 @@ function Dashboard() {
                   <MDBox  mx={2}
                 mt={-3}
                 py={3}
-                px={2} display="flex">
+                px={2} >
+                  <MDBox display="flex" justifyContent="space-between"> 
 
-                  <MDInput type="text" label="Name" value="" onChange="" /> 
-        
-                  <MDInput type="text" label="Description" value="" onChange=""  /> 
+                  {/* <MDInput type="text" label="Name" value="" onChange="" />  */}
+                        {/* <Box sx={{ minWidth: 120 }}>
+                          <FormControl fullWidth>
+                            
+                            <Select
+                              labelId="demo-simple-select-label"
+                              id="demo-simple-select"
+                              value={selectedOperator}
+                              label="Operator"
+                              onChange={handleChangeOperator}
+                              placeholder="Select operator"
+                            >
+                              {allOperators.map((op) => {
+                                {
+                                  if(operatorTableData.length>0){
+                                    operatorTableData.map((opTable) => {
+                                      if (op.name != opTable.operatorname) {
+                                        console.log(op.name, opTable.operatorname);
+                                        <MenuItem value={op.value}>{op.name}</MenuItem>
+                                      }
+                                    })
+                                  }
+                                  else{
+                                    <MenuItem value={op.value}>{op.name}</MenuItem>
+                                  }
+                                }
+                              })}
 
+
+
+
+                            </Select>
+                          </FormControl>
+                        </Box> */}
+                        <select
+                        value={selectedOperator}
+                        onChange={handleChangeOperator}>
+                          {allOperators.map((op) => (
+                            <option value={op.value}>{op.name}</option>
+                                // {
+                                //   if(operatorTableData.length>0){
+                                //     operatorTableData.map((opTable) => {
+                                //       if (op.name != opTable.operatorname) {
+                                //         console.log(op.name, opTable.operatorname);
+                                //         <option value={op.value}>{op.name}</option>
+                                //       }
+                                //     })
+                                //   }
+                                //   else{
+                                //     <option value={op.value}>{op.name}</option>
+                                //   }
+                                // }
+                              ))}
+
+
+
+                        </select>
+                 
                   <MDBox display="flex" justifyContent="flex-end">
                     
-                  <MDButton size="small" variant="gradient" color="info"
-                    onClick="">
+                  <MDButton size="small" variant="gradient" color="success"
+                    onClick={handleAddOperator}>
                     Add
                   </MDButton>
+                  &nbsp;&nbsp;
+
                  
                   
                   {/* </Link> */}
                   
         
-                  <MDButton size="small" variant="gradient" color="info"
-                    onClick={()=> setShowAddOperator(false)}>
+                  <MDButton size="small" variant="gradient" color="error"
+                    onClick={handleCancelAddOperator}>
                     Cancel
                   </MDButton>
                   </MDBox>
+                  </MDBox>
+                  
                   </MDBox>
                   
         
@@ -387,21 +660,134 @@ function Dashboard() {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
+                <MDTypography variant="h6" color="white" display="flex" justifyContent="space-between">
                   Attributes Table
+
+                  <MDBox display="flex" justifyContent="flex-end">
+              <MDButton size="small" variant="outlined" color="white"
+                    onClick={() => setShowAddAttributes(true)}
+                    >
+                    Add Attribute
+                  </MDButton>
+              </MDBox>
                   
                 </MDTypography>
-
                 
               </MDBox>
+              {showAddAttributes && (
+                  <div>
+                    <br />
+                    <MDBox mx={2}
+                      mt={-3}
+                      py={3}
+                      px={2} >
+                      <MDBox display="flex" justifyContent="space-between">
+
+                        <MDInput type="text" label="Name" value={attributeName} onChange={handleAttributeName} /> 
+                        {/* <Box sx={{ minWidth: 120 }}>
+                        <FormControl fullWidth>
+                          
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={selectedOperator}
+                            label="Operator"
+                            onChange={handleChangeOperator}
+                            placeholder="Select operator"
+                          >
+                            {allOperators.map((op) => {
+                              {
+                                if(operatorTableData.length>0){
+                                  operatorTableData.map((opTable) => {
+                                    if (op.name != opTable.operatorname) {
+                                      console.log(op.name, opTable.operatorname);
+                                      <MenuItem value={op.value}>{op.name}</MenuItem>
+                                    }
+                                  })
+                                }
+                                else{
+                                  <MenuItem value={op.value}>{op.name}</MenuItem>
+                                }
+                              }
+                            })}
+
+
+
+
+                          </Select>
+                        </FormControl>
+                      </Box> */}
+
+                        <select
+                          value={selectedAttribute}
+                          onChange={handleSelectedAttribute}>
+                            <option value=''>Select Type</option>
+                                <option value="INT">Int</option>
+                                <option value="BOOL">Boolean</option>
+                                <option value="STRING">String</option>
+                          {/* {allOperators.map((op) => (
+                            <option value={op.value}>{op.name}</option>
+                            // {
+                            //   if(operatorTableData.length>0){
+                            //     operatorTableData.map((opTable) => {
+                            //       if (op.name != opTable.operatorname) {
+                            //         console.log(op.name, opTable.operatorname);
+                            //         <option value={op.value}>{op.name}</option>
+                            //       }
+                            //     })
+                            //   }
+                            //   else{
+                            //     <option value={op.value}>{op.name}</option>
+                            //   }
+                            // }
+                          ))} */}
+
+
+
+                        </select>
+                        <MDInput type="text" label="values" value={attributeValue} onChange={handleAttributeValue} />
+
+                        <MDBox display="flex" justifyContent="flex-end">
+
+                          <MDButton size="small" variant="gradient" color="success"
+                            onClick={handleAddAttribute}>
+                            Add
+                          </MDButton>
+                          &nbsp;&nbsp;
+
+                          <MDButton size="small" variant="gradient" color="error"
+                            onClick={handleCancelAddAttribute}>
+                            Cancel
+                          </MDButton>
+                        </MDBox>
+                      </MDBox>
+
+                    </MDBox>
+
+
+
+                  </div>
+              )}
+
               <MDBox pt={3}>
-                <DataTable
-                  table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
+              <DataTable
+                table={{
+                  columns: [
+                    
+                    {
+                       Header: "Name", accessor: "name", width: "10%" },
+                       { Header: "Type", accessor: "type", width: "10%" },
+                    { Header: "Values", accessor: "values", width: "10%" },
+                    // { Header: "Actions", accessor: "actions", width: "25%", Cell: ActionsColumn },
+                    // { Header: "age", accessor: "age", width: "12%" },
+                  ],
+                  rows: attributesTableData }}
+
+                  // onRowClick={(rowData) => {
+                  //   // Handle row click, e.g., navigate to a detail page
+                  //   console.log("Row Clicked:", rowData);
+                  // }}
+                  />
               </MDBox>
             </Card>
           </Grid>

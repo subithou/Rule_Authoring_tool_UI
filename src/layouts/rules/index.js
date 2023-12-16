@@ -43,6 +43,12 @@ import MDInput from "components/MDInput";
 import { usePackage } from "layouts/PackageContext";
 import { PackageProvider } from "layouts/PackageContext";
 
+// api for operators
+import { addOperators, createOperators, deleteOperators, getOperators } from "API/OperatorsAPI";
+
+// api for attributes
+import { createVariables, deleteVariables, getVariables } from "API/AttributesAPI";
+
 
 
 function Tables() {
@@ -82,6 +88,53 @@ function Tables() {
     setInputDescription(event.target.value);
   }
 
+  // call operators
+  const [operatorTableData, setOperatorTableData] = useState([]);
+
+  const getOperator = async() => {
+    setOperatorTableData([]);
+   
+    try {
+
+      const response = await getOperators(selectedPackageId);
+      console.log(response.data);
+      if (response.data.Operators.length > 0) {
+       
+        
+        let responseOperator = response.data.Operators;
+        {responseOperator.map((operator) => {
+          setOperatorTableData((prevData) => [...prevData, operator]);
+        })}
+        console.log(operatorTableData,'op table data', response.data.Operators)
+      }
+    }catch(error){
+      console.log(error, 'while fetching operator')
+
+    }
+
+  }
+
+  const [attributesTableData, setAttributesTableData] = useState([]);
+  const getAttributes = async() => {
+    setAttributesTableData([]);
+
+    
+    try{
+      const response = await getVariables(selectedPackageId);
+      console.log(response, 'get attributes')
+      if (response.data.item.length > 0) {
+
+        let responseAttributes = response.data.item;
+        {responseAttributes.map((attributes) => {
+          setAttributesTableData((prevData) => [...prevData, attributes]);
+        })}
+        console.log(attributesTableData,'attri table data', response.data.item)
+      }
+    }catch(error){
+      console.log(error, 'error in get attributes')
+    }
+  }
+
   const [currentrule, setCurrentRule] = useState('');
 
   const addLinearName = async(event) => {
@@ -89,7 +142,10 @@ function Tables() {
     if (inputName && inputDescription) {
       let rule_id = String(Date.now())
       setTableData((prevData) => [...prevData, { id: rule_id , name: inputName, description: inputDescription }])
+      
       setCurrentRule(rule_id);
+      await getOperator();
+      await getAttributes();
 
       setInputName('');
       setInputDescription('');
@@ -255,13 +311,14 @@ function Tables() {
       // ... Other columns
       { Header: "Delete", accessor: "delete", width: "15%", Cell: DeleteColumn },
     ];
-  
     const dynamicColumns = conditions.map((condition) => ({
       Header: condition,
       accessor: condition,
       width: "15%",
-      Cell: ({ row }) => (
-        <div>
+      Cell: ({ row }) => {
+        const selectedConditionData = attributesTableData.find((data) => data.name==condition);
+        return (
+          <div>
           <select
             value={conditionData[row.original.id]?.[condition]?.operator || ""}
             onChange={(e) =>
@@ -269,19 +326,96 @@ function Tables() {
             }
           >
             <option value="">Select Operator</option>
-            <option value="equals">Equals</option>
-             <option value="contains">Contains</option>
+            {/* <option value="equals">Equals</option>
+             <option value="contains">Contains</option> */}
+             {operatorTableData.map((op) => (
+              <option value={op.operatorvalue}>{op.operatorvalue}</option>
+             ))}
           </select>
-          <input
+          
+
+          <select
+            value={conditionData[row.original.id]?.[condition]?.value || ""}
+            onChange={(e) =>
+              handleValueChange(condition, row.original.id, e.target.value)
+            }
+            
+          >
+            <option value="">Select Value</option>
+            {selectedConditionData?.values.map((value) => (
+              <option key={value} value={value}>{value}</option>
+            ))}
+            
+            
+             
+             
+          </select>
+          {/* {operatorTableData.map((op) => (
+              <option value={op.operatorvalue}>{op.operatorvalue}</option>
+             ))} */}
+
+
+          {/* <input
             type="text"
             value={conditionData[row.original.id]?.[condition]?.value || ""}
             onChange={(e) =>
               handleValueChange(condition, row.original.id, e.target.value)
             }
-          />
+          /> */}
         </div>
-      ),
+        )
+      },
     }));
+  
+    // const dynamicColumns = conditions.map((condition) => ({
+    //   Header: condition,
+    //   accessor: condition,
+    //   width: "15%",
+    //   Cell: ({ row }) => (
+    //     <div>
+    //       <select
+    //         value={conditionData[row.original.id]?.[condition]?.operator || ""}
+    //         onChange={(e) =>
+    //           handleOperatorChange(condition, row.original.id, e.target.value)
+    //         }
+    //       >
+    //         <option value="">Select Operator</option>
+    //         {/* <option value="equals">Equals</option>
+    //          <option value="contains">Contains</option> */}
+    //          {operatorTableData.map((op) => (
+    //           <option value={op.operatorvalue}>{op.operatorvalue}</option>
+    //          ))}
+    //       </select>
+          
+
+    //       <select
+    //         value={conditionData[row.original.id]?.[condition]?.value || ""}
+    //         onChange={(e) =>
+    //           handleValueChange(condition, row.original.id, e.target.value)
+    //         }
+            
+    //       >
+    //         <option value="">Select Value</option>
+            
+            
+             
+             
+    //       </select>
+    //       {/* {operatorTableData.map((op) => (
+    //           <option value={op.operatorvalue}>{op.operatorvalue}</option>
+    //          ))} */}
+
+
+    //       {/* <input
+    //         type="text"
+    //         value={conditionData[row.original.id]?.[condition]?.value || ""}
+    //         onChange={(e) =>
+    //           handleValueChange(condition, row.original.id, e.target.value)
+    //         }
+    //       /> */}
+    //     </div>
+    //   ),
+    // }));
 
   
     return [...baseColumns, ...dynamicColumns];
@@ -370,8 +504,7 @@ function Tables() {
     // resetConditionData(); // Reset conditionData after adding a new row
   };
   
-  
-  
+
   
   // Function to reset conditionData
   const resetConditionData = () => {
@@ -435,9 +568,16 @@ const handleSave = () => {
   console.log("All Table Data:", allData);
   console.log("All Table Data along with rule id", finalLR);
 
+  setLinearRuleData([]);
+  setActionData([]);
+  setConditions([])
+  setConditionData({});
+
+
   setShowLinearRule(false);
   // You can perform further actions with the combined data
 };
+
 
 
 function DeleteColumn({ row }) {
@@ -591,7 +731,12 @@ function handleDeleteRow(rowId) {
 
               <Card ref={newRuleRef} tabIndex={-1}>
 
-                <MDBox pt={3}>
+                <MDBox pt={3}  >
+                  <MDBox mx={2}
+                      mt={-3}
+                      py={3}
+                      px={2}  display="flex" justifyContent="space-between">
+                  <MDBox>
                   <MDButton size="small" variant="gradient" color="secondary" align="right"
                     // onClick={() => addCondition("ConditionName1")}
                     >
@@ -602,7 +747,9 @@ function handleDeleteRow(rowId) {
                     onClick={() => setShowLinearRule(false)}>
                     Action
                   </MDButton>
+                    </MDBox>
                   &nbsp;&nbsp;
+                  <MDBox display="flex" justifyContent="flex-end">
                   <MDButton size="small" variant="gradient" color="success"
                     onClick={handleSave}>
                     Save
@@ -613,18 +760,28 @@ function handleDeleteRow(rowId) {
                     onClick={() => setShowLinearRule(false)}>
                     Close
                   </MDButton>
+                  </MDBox>
+                  </MDBox>
+
                   <div>
                     {/* UI for adding conditions */}
                     <select value={selectedCondition} onChange={handleConditionChange}>
                   <option value="" disabled>Select Condition</option>
-                  {availableConditions.map((condition) => (
+                  {/* {availableConditions.map((condition) => (
                     <option key={condition} value={condition}>
                       {condition}
                     </option>
+                  ))} */}
+                  {attributesTableData.map((condition) => (
+                    <option key={condition.id} value={condition.name}>
+                      {condition.name}
+                    </option>
                   ))}
                 </select>
+
                 <button onClick={addSelectedCondition}>Add Condition</button>
                 <button onClick={addRowToDataTable1}>Add Row</button>
+                
                 <div>
                   <select value={selectedAction} onChange={handleActionChange}>
                     <option value="" disabled>Select Action</option>

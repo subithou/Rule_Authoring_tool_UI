@@ -573,10 +573,18 @@ const handleSave = () => {
   setConditions([])
   setConditionData({});
 
-
   setShowLinearRule(false);
   // You can perform further actions with the combined data
 };
+
+const handleCancel = () => {
+  setLinearRuleData([]);
+  setActionData([]);
+  setConditions([])
+  setConditionData({});
+
+  setShowLinearRule(false);
+}
 
 
 
@@ -757,7 +765,7 @@ function handleDeleteRow(rowId) {
                   &nbsp;
 
                   <MDButton size="small" variant="gradient" color="error"
-                    onClick={() => setShowLinearRule(false)}>
+                    onClick={handleCancel}>
                     Close
                   </MDButton>
                   </MDBox>

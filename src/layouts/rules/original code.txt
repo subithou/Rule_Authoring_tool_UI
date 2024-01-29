@@ -1,3 +1,24 @@
+{
+    "LRId": "1706531669190",
+    "rule": [
+        {
+            "id": "1706531652409",
+            "Balance": {
+                "operator": ">",
+                "value": "500000"
+            },
+            "Set Participant Data": "w45"
+        },
+        {
+            "id": "1706531661037",
+            "Balance": {
+                "operator": ">",
+                "value": "300000"
+            },
+            "Set Participant Data": "rrr"
+        }
+    ]
+}
 <DataTable
   table={{
     columns: [

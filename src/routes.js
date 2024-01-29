@@ -61,6 +61,7 @@ const routes = [
     component: <Dashboard />,
 
   },
+  
   // {
   //   type: "collapse",
   //   name: "FAQ",

@@ -51,6 +51,8 @@ import { addOperators, createOperators, deleteOperators, getOperators } from "AP
 // api for attributes
 import { createVariables, deleteVariables, getVariables } from "API/AttributesAPI";
 
+// api for actions 
+import { createActionsAPi, createActiontable, deleteActions, getAllActions } from "API/ActionAPI";
 import MDInput from "components/MDInput";
 
 
@@ -110,11 +112,33 @@ function Dashboard() {
   
 
 
-  const OpenActions = () => {
+  const [actionTableData, setActionTableData] = useState([]);
+  const OpenActions =  async() => {
     setShowOperator(false);
     setShowActions(true);
     setShowAttributes(false);
     setShowOverview(false);
+    try {
+
+      const response = await getAllActions(selectedPackageId);
+      console.log(response.data);
+      if (response.data.length === 0) {
+       console.log(response.data.length);
+        try{
+          const response = await createActiontable({packageid:selectedPackageId ,actiontablename: "ActionTable", actiontableid:String(Date.now()) })
+          console.log(response, 'successfully created actiontable')
+        }
+        catch(error){
+          console.log(error, 'getting error for creating action table if not there')
+        }
+      }
+      else{
+        console.log(response.data)
+      }
+    }catch(error){
+      console.log(error, 'while fetching actions')
+
+    }
   }
 
   const OpenOverview = () => {
@@ -126,9 +150,6 @@ function Dashboard() {
 
   const [operatorTableData, setOperatorTableData] = useState([]);
   const [showAddOperator, setShowAddOperator] = useState(false);
-  
-
-
 
   //select operator
   const [selectedOperator, setSelectedOperator] = useState('');
@@ -201,6 +222,7 @@ const renderErrorSB = (
         { allOperators.map((item) => {
           if(selectedOperator === item.value){
             opName = item.name
+            console.log(opName, 'opName')
           }
         })}
         
@@ -290,18 +312,29 @@ const handleAddAttribute = async() => {
       const response = await createVariables({packageid:String(selectedPackageId), item: [{
         id: String(Date.now()),
         name: attributeName,
+        type: selectedAttribute,
         values: attributeValue
       }] })
       
    
-    console.log(response, 'insert one attribute succe');
+    console.log(response, 'insert one attribute succe', {packageid:String(selectedPackageId), item: [{
+      id: String(Date.now()),
+      name: attributeName,
+      type: selectedAttribute,
+      values: attributeValue
+    }] });
     setShowAddAttributes(false);
     OpenAttributes();
     setSuccessSB(true);
 
 
     }catch(error){
-      console.log(error, 'error in adding an attributes')
+      console.log(error, 'error in adding an attributes', {packageid:String(selectedPackageId), item: [{
+        id: String(Date.now()),
+        name: attributeName,
+        type: selectedAttribute,
+        values: attributeValue
+      }] })
       setErrorSB(true)
     }
 
@@ -322,6 +355,76 @@ const handleCancelAddAttribute = async() => {
   
 }
 
+
+// manage actions
+
+const [showAddAction, setShowAddAction] = useState(false);
+
+  //select Action
+  const [selectedAction, setSelectedAction] = useState('');
+
+  const allActions = [
+    {
+      name:"Set Participant Data",
+      value: "Set Participant Data"
+    },
+    {
+      name: "Route to",
+      value: "Route to"
+    },
+    {
+      name: "Voicemail",
+      value: "Voicemail"
+    },
+    
+  ]
+
+  const handleChangeAction = (event) => {
+    setSelectedAction(event.target.value);
+  };
+  const handleAddAction = async() => {
+    if(selectedAction){
+      try {
+        // let opName = '';
+        // { allOperators.map((item) => {
+        //   if(selectedOperator === item.value){
+        //     opName = item.name
+        //     console.log(opName, 'opName')
+        //   }
+        // })}
+        
+
+      //   const response = await addOperators({packageid:String(selectedPackageId), packagename:"CTS-Package-Demo", operators:[
+          
+      //     {
+      //       operatorid: String(Date.now()),
+      //       operatorname: opName,
+      //       operatorvalue: selectedOperator
+      //     }
+      //   ]
+      // })
+      setActionTableData((prevData) => [...prevData, { actionid: String(Date.now()), actionname: selectedAction}]);
+
+      console.log(response, 'insert one action succe');
+      setShowAddAction(false);
+      OpenActions();
+      setSuccessSB(true);
+
+
+      }catch(error){
+        console.log(error, 'error in adding an action')
+        // setErrorSB(true)
+      }
+      
+    }
+    setSelectedAction('');
+  }
+
+  const handleCancelAddAction = async() => {
+    setShowAddAction(false);
+    setSelectedAction('');
+    
+  }
 
   
 
@@ -502,10 +605,10 @@ const handleCancelAddAttribute = async() => {
                   Operators Table
 
                   <MDBox display="flex" justifyContent="flex-end">
-              <MDButton size="small" variant="outlined" color="white"
+                  <MDButton size="small" variant="outlined" color="white"
                     onClick={() => setShowAddOperator(true)}
                     >
-                    Add Operator
+                    New - 2 Operator
                   </MDButton>
               </MDBox>
                   
@@ -587,7 +690,7 @@ const handleCancelAddAttribute = async() => {
                     
                   <MDButton size="small" variant="gradient" color="success"
                     onClick={handleAddOperator}>
-                    Add
+                    Save
                   </MDButton>
                   &nbsp;&nbsp;
 
@@ -667,7 +770,7 @@ const handleCancelAddAttribute = async() => {
               <MDButton size="small" variant="outlined" color="white"
                     onClick={() => setShowAddAttributes(true)}
                     >
-                    Add Attribute
+                    New Attribute
                   </MDButton>
               </MDBox>
                   
@@ -751,7 +854,7 @@ const handleCancelAddAttribute = async() => {
 
                           <MDButton size="small" variant="gradient" color="success"
                             onClick={handleAddAttribute}>
-                            Add
+                            Save
                           </MDButton>
                           &nbsp;&nbsp;
 
@@ -811,22 +914,96 @@ const handleCancelAddAttribute = async() => {
                 borderRadius="lg"
                 coloredShadow="info"
               >
-                <MDTypography variant="h6" color="white">
+                <MDTypography variant="h6" color="white" display="flex" justifyContent="space-between">
                   Actions Table
+                  <MDBox display="flex" justifyContent="flex-end">
+                  <MDButton size="small" variant="outlined" color="white"
+                    onClick={() => setShowAddAction(true)}
+                    >
+                    New Action
+                  </MDButton>
+              </MDBox>
                   
                 </MDTypography>
 
                 
               </MDBox>
-              <MDBox pt={3}>
-                <DataTable
-                  table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
+              {showAddAction && (
+              
+              <div>
+              <br/>
+              <MDBox  mx={2}
+            mt={-3}
+            py={3}
+            px={2} >
+              <MDBox display="flex" justifyContent="space-between"> 
+
+              
+                    <select
+                    value={selectedAction}
+                    onChange={handleChangeAction}>
+                      {allActions.map((op) => (
+                        <option value={op.value}>{op.name}</option>
+                            
+                          ))}
+
+                    </select>
+             
+              <MDBox display="flex" justifyContent="flex-end">
+                
+              <MDButton size="small" variant="gradient" color="success"
+                onClick={handleAddAction}>
+                Save
+              </MDButton>
+              &nbsp;&nbsp;
+
+             
+              
+              {/* </Link> */}
+              
+    
+              <MDButton size="small" variant="gradient" color="error"
+                onClick={handleCancelAddAction}>
+                Cancel
+              </MDButton>
               </MDBox>
+              </MDBox>
+              
+              </MDBox>
+              
+    
+    
+            </div>
+          
+            )}
+
+        
+          <MDBox pt={3}>
+            {/* <DataTable
+              table={{ columns, rows }}
+              isSorted={false}
+              entriesPerPage={false}
+              showTotalEntries={false}
+              noEndBorder
+            /> */}
+            
+            <DataTable
+            table={{
+              columns: [
+                { Header: "ID", accessor: "actionid", width: "15%" },
+                { Header: "Name", accessor: "actionname", width: "20%" },
+                // { Header: "Value", accessor: "operatorvalue", width: "20%" },
+                // { Header: "Actions", accessor: "actions", width: "25%", Cell: ActionsColumn },
+                // { Header: "age", accessor: "age", width: "12%" },
+              ],
+              rows: actionTableData }}
+
+              // onRowClick={(rowData) => {
+              //   // Handle row click, e.g., navigate to a detail page
+              //   console.log("Row Clicked:", rowData);
+              // }}
+              />
+          </MDBox>
             </Card>
           </Grid>
 

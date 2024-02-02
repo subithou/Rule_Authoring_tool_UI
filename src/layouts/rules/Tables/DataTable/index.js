@@ -57,6 +57,10 @@ function DataTable({
   const columns = useMemo(() => table.columns, [table]);
   const data = useMemo(() => table.rows, [table]);
 
+  // for high light - selected row
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null)
+ 
+
   const tableInstance = useTable(
     { columns, data, initialState: { pageIndex: 0 } },
     useGlobalFilter,
@@ -213,7 +217,9 @@ function DataTable({
                 key={key}
                 {...row.getRowProps()}
                 onClick={() => onRowClick && onRowClick(row.original)} // Invoke onRowClick when a row is clicked
-                style={{ cursor: onRowClick ? "pointer" : "default" }} // Change cursor style if onRowClick is provided
+                style={{ cursor: onRowClick ? "pointer" : "default"
+               //highlight selected row
+              }} // Change cursor style if onRowClick is provided
               >
                 {row.cells.map((cell, idx) => (
                   <DataTableBodyCell

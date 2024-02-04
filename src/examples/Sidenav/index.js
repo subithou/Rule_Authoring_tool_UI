@@ -91,6 +91,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             icon={icon}
             active={key === collapseName}
             noCollapse={noCollapse}
+           
           />
         </Link>
       ) : (

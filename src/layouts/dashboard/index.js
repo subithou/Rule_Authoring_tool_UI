@@ -434,7 +434,7 @@ const [showAddAction, setShowAddAction] = useState(false);
       <DashboardNavbar packageid="123" />
       <MDBox py={3}> 
          <Grid container spacing={3}>
-          <Grid item xs={12} md={6} lg={3}>
+          <Grid item xs={12} md={6} lg={4}>
             <MDBox mb={1}>
                
               <ComplexStatisticsCard
@@ -457,7 +457,7 @@ const [showAddAction, setShowAddAction] = useState(false);
                 
             </MDBox>
           </Grid>
-          <Grid item xs={12} md={6} lg={3}>
+          <Grid item xs={12} md={6} lg={4}>
             <MDBox mb={1}>
               <ComplexStatisticsCard
                 icon="leaderboard"
@@ -474,7 +474,7 @@ const [showAddAction, setShowAddAction] = useState(false);
               />
             </MDBox>
           </Grid>
-          <Grid item xs={12} md={6} lg={3}>
+          <Grid item xs={12} md={6} lg={4}>
             {/* <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 color="success"
@@ -507,14 +507,14 @@ const [showAddAction, setShowAddAction] = useState(false);
               />
             </MDBox>
           </Grid>
-          <Grid item xs={12} md={6} lg={3}>
+          {/* <Grid item xs={12} md={6} lg={3}>
             <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 color="primary"
                 icon="preview"
-                title={<MDButton size="small" variant="outlined" color="success" onClick={OpenOverview}>
+                title={<MDButton size="small" variant="outlined" color="success" onClick={OpenOverview}> */}
                 {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
-                view
+                {/* view
               </MDButton>}
                 count="Overview"
                 percentage={{
@@ -524,7 +524,7 @@ const [showAddAction, setShowAddAction] = useState(false);
                 }}
               />
             </MDBox>
-          </Grid>
+          </Grid> */}
         </Grid> 
         <div>
      
@@ -662,7 +662,7 @@ const [showAddAction, setShowAddAction] = useState(false);
                             </Select>
                           </FormControl>
                         </Box> */}
-                        <select
+                        <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent"
                         value={selectedOperator}
                         onChange={handleChangeOperator}>
                           {allOperators.map((op) => (
@@ -821,7 +821,7 @@ const [showAddAction, setShowAddAction] = useState(false);
                         </FormControl>
                       </Box> */}
 
-                        <select
+                        <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent"
                           value={selectedAttribute}
                           onChange={handleSelectedAttribute}>
                             <option value=''>Select Type</option>
@@ -939,7 +939,7 @@ const [showAddAction, setShowAddAction] = useState(false);
               <MDBox display="flex" justifyContent="space-between"> 
 
               
-                    <select
+                    <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent"
                     value={selectedAction}
                     onChange={handleChangeAction}>
                       {allActions.map((op) => (

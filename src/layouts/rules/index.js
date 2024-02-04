@@ -14,6 +14,7 @@ import Footer from "examples/Footer";
 import DataTable from "layouts/rules/Tables/DataTable";
 import DataTable1 from "layouts/rules/linear/Tables/DataTable";
 
+import Icon from "@mui/material/Icon";
 
 // Data
 import authorsTableData from "layouts/tables/data/authorsTableData";
@@ -389,9 +390,9 @@ function Tables() {
 
   const dynamicColumns = useMemo(() => {
     const baseColumns = [
-      { Header: "ID", accessor: "id", width: "10%" },
+      // { Header: "ID", accessor: "id", width: "10%" },
       // ... Other columns
-      { Header: "Delete", accessor: "delete", width: "10%", Cell: DeleteColumn },
+      { Header: "", accessor: "delete", width: "10%", Cell: DeleteColumn },
     ];
     const dynamicColumns = conditions.map((condition) => ({
       Header: condition,
@@ -668,7 +669,14 @@ function DeleteColumn({ row }) {
       onClick={() => handleDeleteRow(row.original.id)}
       style={{ cursor: "pointer" }}
     >
-      delete
+      <MDBox display="flex" alignItems="" mt={{ xs: 2, sm: 0 }} ml={{ xs: 0, sm: 0 }}>
+            <MDBox mr={1}>
+              <MDButton variant="text" color="error">
+                <Icon>delete</Icon>&nbsp;delete
+              </MDButton>
+            </MDBox>
+            
+          </MDBox>
     </MDBox>
   );
 }
@@ -715,12 +723,58 @@ const showDecisionNameFunction = async() => {
   
 }
 
+console.log(conditions,'conditions');
+const availableConditionOptions = () => {
+
+const options = [];
+
+attributesTableData.map((condition) => {
+  for(let i=0; i < conditions.length; i++){
+    console.log(conditions, 'conditions');
+    console.log(conditions[i], 'looping insisde conditions')
+    if(conditions[i] != condition.name){
+      
+      options.push(
+        <option key={condition.id} value={condition.name}>
+          {condition.name}
+        </option>)
+    
+      
+    }
+  }
+})
+
+return options;
+}
+// const availableConditionOptions = () => {
+
+//   const options = [];
+  
+//   attributesTableData.map((condition) => {
+//     for(let i=0; i < conditions.length; i++){
+//       console.log(conditions, 'conditions');
+//       console.log(conditions[i], 'looping insisde conditions')
+//       if(conditions[i] != condition.name){
+        
+//         options.push(
+//           <option key={condition.id} value={condition.name}>
+//             {condition.name}
+//           </option>)
+      
+        
+//       }
+//     }
+//   })
+  
+//   return options;
+//   }
 
   return (
     
     <DashboardLayout>
       <DashboardNavbar />
       {/* <Link to='/packages/rules/linear_rule'> */}
+      <br/>
       <MDButton size="small" variant="gradient" color="info"
         onClick={showLinearNameFunction}>
         Add Linear Rule
@@ -781,11 +835,14 @@ const showDecisionNameFunction = async() => {
                       {condition}
                     </option>
                   ))} */}
+                  
                   {attributesTableData.map((condition) => (
                     <option key={condition.id} value={condition.name}>
                       {condition.name}
                     </option>
                   ))}
+                  {availableConditionOptions()}
+                  
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent" value={selectedAction} onChange={handleActionChange}>
@@ -918,7 +975,6 @@ const showDecisionNameFunction = async() => {
 
         <Grid container spacing={6}>
           <Grid item xs={12}>
-
 
             <Card>
               <DataTable

@@ -156,9 +156,33 @@ function DashboardNavbar({ absolute, light, isMini, packageid }) {
       <Toolbar sx={(theme) => navbarContainer(theme)}>
         <MDBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
           <Breadcrumbs icon="home" title={route[route.length - 1]} route={route} light={light} />
-          <MDButton size="small" variant="gradient" color="light">
-            Package -
-            <select
+          {/* <MDButton size="small" variant="gradient" color="light">
+            Package - */}
+            {/* <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent"
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={selectedPackageId}
+              label="Package "
+              onChange={handlePackageChange}
+            >
+              <option value="0" disabled selected>Select Package</option>
+              <option value="1702665896795">CTS-Package-Demo</option>
+              <option value="1701338667074">PackageTestFinal1</option>
+              <option value="p3id">Package3</option>
+            </select> */}
+
+          {/* </MDButton> */}
+
+          
+        
+        </MDBox>
+        {isMini ? null : (
+          <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
+            {/* <MDBox pr={1}>
+              <MDInput label="Search here" />
+
+            </MDBox> */}
+<select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 "
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               value={selectedPackageId}
@@ -170,38 +194,25 @@ function DashboardNavbar({ absolute, light, isMini, packageid }) {
               <option value="1701338667074">PackageTestFinal1</option>
               <option value="p3id">Package3</option>
             </select>
-
-          </MDButton>
-
-          
-        
-        </MDBox>
-        {isMini ? null : (
-          <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
-            <MDBox pr={1}>
-              <MDInput label="Search here" />
-
-            </MDBox>
-
             
             <MDBox color={light ? "white" : "inherit"}>
 
             
 
-                  
-           <Link to='packages'>
+            &nbsp; 
+           {/* <Link to='packages'>
            <MDButton size="small" variant="gradient" color="dark">
               Templates
               </MDButton>
-            </Link>
+            </Link> */}
            
 
-        &nbsp;
+        {/* &nbsp;
         <Link to='/packages/rules'>
         <MDButton size="small" variant="gradient" color="dark" >
           Rules
         </MDButton>
-        </Link>
+        </Link> */}
 
         
 

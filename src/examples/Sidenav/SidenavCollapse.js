@@ -27,7 +27,7 @@ import {
 // Material Dashboard 2 React context
 import { useMaterialUIController } from "context";
 
-function SidenavCollapse({ icon, name, active, ...rest }) {
+function SidenavCollapse({ icon, name, active, child, ...rest }) {
   const [controller] = useMaterialUIController();
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = controller;
 
@@ -68,7 +68,8 @@ function SidenavCollapse({ icon, name, active, ...rest }) {
             })
           }
         />
-      </MDBox>
+        
+       </MDBox>
     </ListItem>
   );
 }

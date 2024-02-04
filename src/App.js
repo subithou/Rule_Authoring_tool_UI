@@ -190,7 +190,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/packages" />} />
+        <Route path="*" element={<Navigate to="/templates" />} />
        
         
       </Routes>

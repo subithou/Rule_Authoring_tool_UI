@@ -60,6 +60,8 @@ import {
 import { usePackage } from "layouts/PackageContext";
 import { PackageProvider } from "layouts/PackageContext";
 
+// calling api for get packages
+import { getpackages } from "API/PackageAPI";
 
 
 function DashboardNavbar({ absolute, light, isMini, packageid }) {
@@ -107,6 +109,9 @@ function DashboardNavbar({ absolute, light, isMini, packageid }) {
 
     // Remove event listener on cleanup
     return () => window.removeEventListener("scroll", handleTransparentNavbar);
+
+    fetchPackages();
+
   }, [dispatch, fixedNavbar]);
 
   const handleMiniSidenav = () => setMiniSidenav(dispatch, !miniSidenav);
@@ -146,6 +151,31 @@ function DashboardNavbar({ absolute, light, isMini, packageid }) {
     },
   });
 
+  useEffect(() => {
+
+    fetchPackages();
+    
+}, []);
+const[allPackages, setAllPackages] =  useState([]);
+
+const fetchPackages = async () => {
+  
+    setAllPackages([]);
+   
+    try {
+        const response = await getpackages();
+        
+        console.log(response);
+        setAllPackages(response);
+       
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        
+       
+    }
+ 
+};
+
   return (
     
     <AppBar
@@ -182,18 +212,23 @@ function DashboardNavbar({ absolute, light, isMini, packageid }) {
               <MDInput label="Search here" />
 
             </MDBox> */}
-<select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 "
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={selectedPackageId}
-              label="Package "
-              onChange={handlePackageChange}
-            >
-              <option value="0" disabled selected>Select Package</option>
-              <option value="1702665896795">CTS-Package-Demo</option>
-              <option value="1701338667074">PackageTestFinal1</option>
-              <option value="p3id">Package3</option>
-            </select>
+          {route == 'packages' ? null: (
+            <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 "
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={selectedPackageId}
+            label="Package "
+            onChange={handlePackageChange}
+          >
+            <option value="0" disabled selected>Select Package</option>
+            {/* <option value="1702665896795">CTS-Package-Demo</option>
+            <option value="1701338667074">PackageTestFinal1</option>
+            <option value="p3id">Package3</option> */}
+            {allPackages.map((item) => (
+              <option value={item.packageid}>{item.packagename}</option>
+            ))}
+          </select>
+          )}
             
             <MDBox color={light ? "white" : "inherit"}>
 

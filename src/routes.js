@@ -5,11 +5,16 @@ import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Rules from "layouts/rules";
-import Linear from "layouts/rules/linear";
+import Packages from "layouts/packages";
+
 import Decision from "layouts/rules/decision";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+
+import * as TbIcons from "react-icons/tb";
+import * as BsIcons from "react-icons/bs";
+import * as SiIcons from "react-icons/si";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -19,15 +24,16 @@ const routes = [
     type: "collapse",
     name: "Packages",
     key: "packages",
-    icon: <Icon fontSize="small">notifications</Icon>,
-    route: "packages/rules/linear_rule",
-    component: <Linear />,
+    icon: <TbIcons.TbPackages />,
+    route: "/packages",
+    component: <Packages />,
   },
+  // <Icon fontSize="small">notifications</Icon> package original icon
   {
     type: "collapse",
     name: "Templates",
     key: "templates",
-    icon: <Icon fontSize="small">dashboard</Icon>,
+    icon: <SiIcons.SiGithubactions/>,
     route: "/templates",
     component: <Dashboard />,
     // child : [
@@ -85,7 +91,7 @@ const routes = [
     type: "collapse",
     name: "Rules",
     key: "rules",
-    icon: <Icon fontSize="small">notifications</Icon>,
+    icon: <BsIcons.BsFileEarmarkRuledFill/>,
     route: "/rules",
     component: <Rules />,
   },

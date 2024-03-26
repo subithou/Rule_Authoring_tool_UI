@@ -12,7 +12,7 @@ export const createActiontable = async (item) => {
     }
 }
 
-export const getAllActions = async (packageid) => {
+export const getActionTable = async (packageid) => {
     try {
         const response = await axios.get(`${BASE_URL}/gettableactions/${packageid}`);
         return response.data;

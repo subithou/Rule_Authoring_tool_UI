@@ -24,7 +24,7 @@ export const createOperators = async (item) => {
 
 export const addOperators = async (item) => {
     try {
-        const response = await axios.post(`${BASE_URL}/addoperator`, item);
+        const response = await axios.put(`${BASE_URL}/addoperator`, item);
         return response.data;
 
     } catch (error) {

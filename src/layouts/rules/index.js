@@ -1,3 +1,5 @@
+import { Dropdown } from 'primereact/dropdown';
+        
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -43,10 +45,18 @@ import { addOperators, createOperators, deleteOperators, getOperators } from "AP
 // api for attributes
 import { createVariables, deleteVariables, getVariables } from "API/AttributesAPI";
 
+//api for actions
+import { createActionsAPi, createActiontable, deleteActions, getActionTable } from "API/ActionAPI";
 
+import MDSnackbar from "components/MDSnackbar";
 
 
 function Tables() {
+
+  const SMChange = (selectedOption, actionMeta) => {
+    console.log('selected action', selectedOption);
+    console.log('action meta', actionMeta);
+  }
 
   // for pop over 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -70,6 +80,53 @@ function Tables() {
   const  {selectedPackageId} = usePackage();
   console.log(selectedPackageId, 'inside rule');
 
+
+  // success notification 
+const [title, setTitle] = useState('');
+const [content, setContent] = useState('');
+
+const [successSB, setSuccessSB] = useState(false);
+const closeSuccessSB = () => {
+  setSuccessSB(false);
+  setTitle('');
+  setContent('');
+}
+
+const renderSuccessSB = (
+  <MDSnackbar
+    color="success"
+    icon="check"
+    title={title}
+    content={content}
+    dateTime=""
+    open={successSB}
+    onClose={closeSuccessSB}
+    close={closeSuccessSB}
+    // bgWhite
+  />
+);
+
+//error notification
+const [errorSB, setErrorSB] = useState(false);
+  const closeErrorSB = () => {
+    setErrorSB(false);
+    setTitle('');
+    setContent('');
+  }
+
+const renderErrorSB = (
+  <MDSnackbar
+    color="error"
+    icon="warning"
+    title={title}
+    content={content}
+    dateTime=""
+    open={errorSB}
+    onClose={closeErrorSB}
+    close={closeErrorSB}
+    // bgWhite
+  />
+);
 
 
   const { columns, rows } = authorsTableData();
@@ -145,8 +202,6 @@ function Tables() {
   const [attributesTableData, setAttributesTableData] = useState([]);
   const getAttributes = async() => {
     setAttributesTableData([]);
-
-    
     try{
       const response = await getVariables(selectedPackageId);
       console.log(response, 'get attributes')
@@ -163,6 +218,22 @@ function Tables() {
     }
   }
 
+  const [actionTableData, setActionTableData] = useState([]);
+  const getActions = async() => {
+    setActionTableData([]);
+    try {
+
+      const response = await getActionTable(String(selectedPackageId));
+      console.log(response);
+      console.log(response.data[0].Actions)
+
+      setActionTableData(response.data[0].Actions)
+      
+    }catch (error){
+      console.log(error, 'while fetching actions')
+    }
+  }
+ 
   const [currentrule, setCurrentRule] = useState('');
 
   
@@ -417,6 +488,7 @@ function Tables() {
           </select>
           &nbsp;&nbsp;
 
+         
           <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent"
             value={conditionData[row.original.id]?.[condition]?.value || ""}
             onChange={(e) =>
@@ -439,9 +511,6 @@ function Tables() {
   
     return [...baseColumns, ...dynamicColumns];
   }, [conditions, conditionData]);
-
-  
-
  
   const addRowToDataTable1 = () => {
     const newRow = {
@@ -482,6 +551,7 @@ function Tables() {
 
   const handleActionChange = (event) => {
     setSelectedAction(event.target.value);
+    
     setActionData((prevData) => [...prevData, event.target.value]);
       setSelectedAction("");
   };
@@ -497,6 +567,7 @@ function Tables() {
   console.log(columns, linearRuleData, 'table data linear ')
 const handleActionDataChange = (value,rowId,action) => {
   // // Handle input change and update the data
+  console.log('action data change', value,rowId,action)
   const newData = [...linearRuleData];
   const rowIndex = linearRuleData.findIndex(
     (item) => item.id === rowId
@@ -609,6 +680,7 @@ const addLinearName = async(event) => {
     setCurrentRule(rule_id);
     await getOperator();
     await getAttributes();
+    await getActions();
 
     setInputName('');
     setInputDescription('');
@@ -706,68 +778,46 @@ function handleDeleteRow(rowId) {
 // ...
 
 const showLinearNameFunction = async() => {
-  setShowAddLinearName(true);
+  if(selectedPackageId != null) {
+    setShowAddLinearName(true);
   setLR(true);
   setDT(false);
   await getOperator();
   await getAttributes();
+  await getActions();
+  }else{
+    setErrorSB(true);
+    setTitle('Please select package')
+  }
  
 }
 
 const showDecisionNameFunction = async() => {
+ if(selectedPackageId != null){
   setShowAddLinearName(true);
   setDT(true);
   setLR(false);
   await getOperator();
   await getAttributes();
+  await getActions();
+ }else{
+  setErrorSB(true);
+    setTitle('Please select package')
+ }
   
 }
 
+// for display conditions
 console.log(conditions,'conditions');
-const availableConditionOptions = () => {
 
-const options = [];
 
-attributesTableData.map((condition) => {
-  for(let i=0; i < conditions.length; i++){
-    console.log(conditions, 'conditions');
-    console.log(conditions[i], 'looping insisde conditions')
-    if(conditions[i] != condition.name){
-      
-      options.push(
-        <option key={condition.id} value={condition.name}>
-          {condition.name}
-        </option>)
-    
-      
-    }
-  }
-})
 
-return options;
-}
-// const availableConditionOptions = () => {
+const unSelectedActions = actionTableData.filter(
+  action => !actionData.includes(action.action));
 
-//   const options = [];
-  
-//   attributesTableData.map((condition) => {
-//     for(let i=0; i < conditions.length; i++){
-//       console.log(conditions, 'conditions');
-//       console.log(conditions[i], 'looping insisde conditions')
-//       if(conditions[i] != condition.name){
-        
-//         options.push(
-//           <option key={condition.id} value={condition.name}>
-//             {condition.name}
-//           </option>)
-      
-        
-//       }
-//     }
-//   })
-  
-//   return options;
-//   }
+const unSelectedConditions= attributesTableData.filter(
+    attribute => !conditions.includes(attribute.name));
+
 
   return (
     
@@ -787,6 +837,8 @@ return options;
           Add Decision Table
         </MDButton>
       {/* </Link> */}
+
+     
 
       {/* for adding the new linear rule....so creating rulename...description..etc */}
       {showAddLinearName && (
@@ -828,27 +880,41 @@ return options;
                       py={3}
                       px={0}  display="flex" justifyContent="space-between">
                   <MDBox>
+                    
+
+ 
+ 
+        {/* <div className="card flex justify-content-center">
+            <Dropdown value={selectedCondition} onChange={handleConditionChange} options={unSelectedConditions} optionLabel="name" 
+                editable placeholder="Select a City" className="w-full md:w-14rem" />
+        </div> */}
+  
+        
                   <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent" value={selectedCondition} onChange={handleConditionChange}>
                   <option value="" disabled>Select Condition</option>
-                  {/* {availableConditions.map((condition) => (
-                    <option key={condition} value={condition}>
-                      {condition}
-                    </option>
-                  ))} */}
-                  
-                  {attributesTableData.map((condition) => (
+                 
+                  {unSelectedConditions.map((condition) => (
                     <option key={condition.id} value={condition.name}>
                       {condition.name}
                     </option>
                   ))}
-                  {availableConditionOptions()}
+                  
+                  {/* {attributesTableData.map((condition) => (
+                    <option key={condition.id} value={condition.name}>
+                      {condition.name}
+                    </option>
+                  ))}
+                  {availableConditionOptions()} */}
                   
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent" value={selectedAction} onChange={handleActionChange}>
                     <option value="" disabled>Select Action</option>
-                    <option value="Set Participant Data">Set Participant Data</option>
-                    <option value="Route to ">Route to</option>
+                    {unSelectedActions.map((actions) => (
+                    <option key={actions.actionid} value={actions.value}>
+                      {actions.action}
+                    </option>
+                  ))}
                     
                     {/* Add more actions as needed */}
                   </select>
@@ -909,7 +975,17 @@ return options;
 
                     
 
-                    
+
+          <input className="mt-1 p-2 border rounded-lg text-sm border-gray-300 bg-transparent"
+            type="text"
+            value=""
+           
+            onChange={(e) => { handleActionDataChange(e.target.value,"x","y")
+
+          
+            }}
+
+          /> 
 
 <DataTable1
   table={{
@@ -1036,7 +1112,8 @@ return options;
             </Card>
           </Grid>
 
-
+          {renderSuccessSB}
+      {renderErrorSB}
           {showLinearRule && (
 
             
@@ -1050,32 +1127,41 @@ return options;
                       py={3}
                       px={2}  display="flex" justifyContent="">
                   
-                  <MDTypography variant="h6" color="black">
+                  <MDTypography className="pt-2" variant="h6" color="inherit">
 
 Rule Name : {ruleName}
 
 
 </MDTypography>
+&nbsp;&nbsp;
             
              
-                  <select className="mt-1 p-2  border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent" value={selectedCondition} onChange={handleConditionChange}>
+                  <select 
+                   className="mt-1 p-2  border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent"
+                   value={selectedCondition} 
+                   onChange={handleConditionChange}
+                   >
                   <option value="" disabled>Select Condition</option>
                   {/* {availableConditions.map((condition) => (
                     <option key={condition} value={condition}>
                       {condition}
                     </option>
                   ))} */}
-                  {attributesTableData.map((condition) => (
+                  {unSelectedConditions.map((condition) => (
                     <option key={condition.id} value={condition.name}>
                       {condition.name}
                     </option>
                   ))}
+ 
                 </select>
                 &nbsp;&nbsp;&nbsp;
                 <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 bg-transparent" value={selectedAction} onChange={handleActionChange}>
                     <option value="" disabled>Select Action</option>
-                    <option value="Set Participant Data">Set Participant Data</option>
-                    <option value="Route to ">Route to</option>
+                    {unSelectedActions.map((actions) => (
+                    <option key={actions.actionid} value={actions.value}>
+                      {actions.action}
+                    </option>
+                  ))}
                     
                     {/* Add more actions as needed */}
                   </select>

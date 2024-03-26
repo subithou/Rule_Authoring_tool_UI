@@ -324,10 +324,12 @@ const submitDeleteConfirmation = async() => {
                             <MDBox display="flex" justifyContent="flex-end">
         
                             
-                              <MDButton size="small" variant="gradient" color="success"
+                              {packageName != '' && validationMessageStatus != true ? (
+                                <MDButton size="small" variant="gradient" color="success"
                                 onClick={submit}>
                                 Add
                               </MDButton>
+                              ): null}
                               &nbsp;&nbsp;
         
                               <MDButton size="small" variant="gradient" color="error"

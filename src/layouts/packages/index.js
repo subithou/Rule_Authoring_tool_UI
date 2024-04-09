@@ -50,6 +50,7 @@ import MDSnackbar from "components/MDSnackbar";
 
 // calling API's
  import { getpackages, createPackage, deletePackage } from "API/PackageAPI";
+ import { createActiontable } from "API/ActionAPI";
 
  //loading import
  import Loading from "components/Loading";
@@ -149,8 +150,15 @@ const [validationMessageStatus, setvalidationMessageStatus] = useState(false)
     try {
       let name = {packageid: id, packagename: packageName}
       const newName = await createPackage(name);
-
       console.log(newName, 'succesfully created Package');
+
+      // const actTableid = String(Date.now());
+      // let tableData = {packageid: id, actiontableid: actTableid , actiontablename: "actiontable"}
+      // const CreateActTable = await createActiontable(tableData);
+      // console.log(CreateActTable, 'succesfully created action table');
+
+      
+
       fetchPackages();
       setSuccessSB(true); // for snack bar success
       setTitleContent('Successfully created a package');
@@ -184,7 +192,7 @@ useEffect(() => {
 }, []);
 
 const fetchPackages = async () => {
-  setLoading(true);
+    setLoading(true);
     setAllPackages([]);
    
     try {

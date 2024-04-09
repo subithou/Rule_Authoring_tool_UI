@@ -1,6 +1,6 @@
 import axios from 'axios';
-
-const BASE_URL = 'http://localhost:3001';
+import BASE_URL from 'API/BASE_URL';
+// const BASE_URL = 'http://localhost:3001';
 
 export const createPackage = async (name) => {
     try {

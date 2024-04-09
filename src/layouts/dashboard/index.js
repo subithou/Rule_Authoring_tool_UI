@@ -1323,7 +1323,7 @@ const [showAddAction, setShowAddAction] = useState(false);
                       columns: [
                         { Header: "ID", accessor: "actionid", width: "10%" },
                         { Header: "Name", accessor: "action", width: "10%" },
-                        { Header: "Value", accessor: "value", width: "10%" },
+                        // { Header: "Value", accessor: "value", width: "10%" },
                         { Header: "Delete", accessor: "delete", width: "10%", Cell: DeleteColumnAction },
                         // { Header: "Value", accessor: "operatorvalue", width: "20%" },
                         // { Header: "Actions", accessor: "actions", width: "25%", Cell: ActionsColumn },

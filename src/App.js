@@ -46,6 +46,7 @@ import brandDark from "assets/images/logo-ct-dark.png";
 
 // for getting packageid in all pages
 import { PackageProvider } from "layouts/PackageContext";
+import { PrimeReactProvider } from 'primereact/api';
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();

@@ -176,3 +176,260 @@ setFinalLR((prevData) => [...prevData, { LRId: rule_id, rule: updatedTempAllData
     ]
 }
 put
+
+
+[
+    {
+        "id": "123",
+    
+            "BALANCE": {
+                "operator": "=",
+                "value": "100000"
+            },
+            "ACCNT_STATUS": {
+                "operator": "=",
+                "value": "Yes"
+            },
+            
+            
+            "Set Participant Data": "y"
+        
+    },
+    {
+        "id": "1234",
+        
+            "BALANCE": {
+                "operator": ">",
+                "value": "800000"
+            },
+            "ACCNT_STATUS": {
+                "operator": "=",
+                "value": "Yes"
+            },
+            
+            
+            "Set Participant Data": "y"
+        
+    }
+]
+
+
+
+//------
+const transformInput = (inputData, packageId, decisionRuleName) => {
+    const transformedData = {
+        packageid: packageId,
+        rule: [
+            {
+                decisionrulename: decisionRuleName,
+                decisionrule: []
+            }
+        ]
+    };
+
+    // Iterate over each rule in the input data
+    inputData.forEach((rule, index) => {
+        const { id, ...rest } = rule;
+        const { "Set Participant Data": setParticipantData, ...conditions } = rest;
+
+        const ruleConditions = [];
+        // Create conditions for each key in the rule
+        Object.keys(conditions).forEach(key => {
+            const condition = conditions[key];
+            ruleConditions.push({
+                kvp: key,
+                operator: condition.operator,
+                value: condition.value,
+                logical: ""
+            });
+        });
+
+        // Create actions for each key in the rule
+        const actions = Object.keys(rule)
+            .filter(key => key !== "id")
+            .map(key => ({
+                actionname: key,
+                actionvalue: rule[key],
+                actionid: "1712560974936", // Example action ID
+                actiontableid: "1712560924082" // Example action table ID
+            }));
+
+        // Create a decision rule object
+        const decisionRule = {
+            id: id,
+            description: decisionRuleName,
+            category: decisionRuleName,
+            order: index + 1, // Assuming order starts from 1
+            conditions: ruleConditions,
+            actions: actions
+        };
+
+        // Push the decision rule to the array in the output
+        transformedData.rule[0].decisionrule.push(decisionRule);
+    });
+
+    return transformedData;
+};
+
+// Example usage
+const inputData = [
+    {
+        "id": "123",
+        "BALANCE": {
+            "operator": "=",
+            "value": "100000"
+        },
+        "ACCNT_STATUS": {
+            "operator": "=",
+            "value": "Yes"
+        },
+        "Set Participant Data": "y"
+    },
+    {
+        "id": "1234",
+        "BALANCE": {
+            "operator": ">",
+            "value": "800000"
+        },
+        "ACCNT_STATUS": {
+            "operator": "=",
+            "value": "Yes"
+        },
+        "Set Participant Data": "y"
+    }
+];
+
+const packageId = "x";
+const decisionRuleName = "DT1";
+
+const transformedOutput = transformInput(inputData, packageId, decisionRuleName);
+console.log(transformedOutput);
+
+
+
+
+///----
+const transformOutput = (outputData) => {
+    const inputData = outputData.rule[0].decisionrule.map((decisionRule) => {
+        const { id, conditions, actions } = decisionRule;
+        const rule = {
+            id: id,
+        };
+
+        // Extract conditions
+        conditions.forEach((condition) => {
+            rule[condition.kvp] = {
+                operator: condition.operator,
+                value: condition.value
+            };
+        });
+
+        // Extract actions
+        actions.forEach((action) => {
+            rule[action.actionname] = action.actionvalue;
+        });
+
+        return rule;
+    });
+
+    return inputData;
+};
+
+// Example usage
+const outputData = {
+    "packageid": "x",
+    "rule": [
+        {
+            "decisionrulename": "DT1",
+            "decisionrule": [
+                {
+                    "id": "1234",
+                    "description": "DT1",
+                    "category": "DT1",
+                    "order": "1",
+                    "conditions": [
+                        {
+                            "kvp": "ACCNT_STATUS",
+                            "operator": "=",
+                            "value": "Yes",
+                            "logical": "&&"
+                        },
+                        {
+                            "kvp": "BALANCE",
+                            "operator": "=",
+                            "value": "100000",
+                            "logical": ""
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "actionname": "Set Participant Data",
+                            "actionvalue": "Set Participant Data",
+                            "actionid": "1712560974936",
+                            "actiontableid": "1712560924082"
+                        }
+                    ]
+                },
+                {
+                    "id": "12344",
+                    "description": "DT1",
+                    "category": "DT1",
+                    "order": "2",
+                    "conditions": [
+                        {
+                            "kvp": "ACCNT_STATUS",
+                            "operator": ">",
+                            "value": "Yes",
+                            "logical": "&&"
+                        },
+                        {
+                            "kvp": "BALANCE",
+                            "operator": ">",
+                            "value": "800000",
+                            "logical": ""
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "actionname": "Set Participant Data",
+                            "actionvalue": "Set Participant Data",
+                            "actionid": "1712560974936",
+                            "actiontableid": "1712560924082"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+const inputData = transformOutput(outputData);
+console.log(inputData);
+
+-----
+// Assume `xmlFile` is the XML file you want to send
+
+// Convert XML content to a Blob object
+const blob = new Blob([xmlFile], { type: 'text/xml' });
+
+// Create FormData object to append the Blob object
+const formData = new FormData();
+formData.append('file', blob, 'filename.xml'); // 'file' is the name of the field on the backend, 'filename.xml' is the name of the file
+
+// Send the FormData object to the backend using Fetch API
+fetch('http://your-backend-api.com/upload', {
+  method: 'POST',
+  body: formData
+})
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Success:', data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });

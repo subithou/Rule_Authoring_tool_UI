@@ -212,7 +212,7 @@ const fetchPackages = async () => {
               <MDInput label="Search here" />
 
             </MDBox> */}
-          {route == 'packages' ? null: (
+          {route == 'packages' || route == 'import' ? null: (
             <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 "
             labelId="demo-simple-select-label"
             id="demo-simple-select"

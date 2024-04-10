@@ -56,6 +56,9 @@ import { updateLinearRule } from 'API/RuleAPI';
 
 
 import { LuRefreshCw } from "react-icons/lu";
+import { createDecisionTable } from 'API/RuleAPI';
+import { addDecisionRules } from 'API/RuleAPI';
+import { getDecisionRule } from 'API/RuleAPI';
 
 
 function Tables() {
@@ -92,7 +95,7 @@ function Tables() {
   
   //if any change is happpen in package need to reload
   useEffect (() => {
-    fetchLinearRule();
+    FetchAllRules();
   }, [selectedPackageId]);
 
 // loading the rules whne the page load and package change
@@ -101,10 +104,17 @@ function Tables() {
 // }, []);
 
 
+const FetchAllRules = async () => {
+  setTableData([]);
+  setFinalLR([]);
+  await fetchLinearRule();
+  await fetchDecisionRule();
+}
+
   const fetchLinearRule = async () => {
     setLoading(true);
-    setTableData([]);
-    setFinalLR([]);
+    // setTableData([]);
+    // setFinalLR([]);
 
     if(selectedPackageId != null){
       try {
@@ -193,8 +203,93 @@ function Tables() {
   setLoading(false)
 };
 
+const transformOutput = (outputData) => {
+ 
+  for(const key of outputData.rule){
+    const inputData = key.DecisionRule.map((decisionRule) => {
+      const { RuleID, Conditions, Actions } = decisionRule;
+      const rule = {
+          id: RuleID,
+      };
+
+      // Extract conditions
+      Conditions.forEach((condition) => {
+          rule[condition.KVP] = {
+              operator: condition.Operator,
+              value: condition.Value
+          };
+      });
+
+      // Extract actions
+      Actions.forEach((action) => {
+          rule[action.ActionName] = action.ActionValue;
+      });
+
+      return rule;
+
+  });
+
+ 
+  setFinalLR((prevData) => [...prevData, { LRId: key.DecisionID, rule: inputData }]);
+  console.log(inputData, 'transformOUTPUT - DT')
+  setTableData((prevData) => [...prevData, { 
+    id: key.DecisionID, 
+    name: key.DecisionTableName,
+    type: 'Decision Table',
+    description: key.DecisionRule[0].RuleDescription,
+    category:  key.DecisionRule[0].RuleCategory
+    }])
+
+  }
+ 
+};
+
+
+
+const fetchDecisionRule = async () => {
+  setLoading(true);
+  // setTableData([]);
+  // setFinalLR([]);
+
+  if(selectedPackageId != null){
+    try {
+
+      const response = await getDecisionRule(selectedPackageId);
+
+      console.log(response, "successfully fetchedapi get decision rule ");
+      console.log(response.data, "fetched api get decision rule ");
+
+      transformOutput(response.data);
+      // console.log(inputData, 'DRules after transform from fetch api');
+
+
+      // console.log(transformedData, "after fetching the get LR api");
+      setSuccessSB(true);
+      setTitle('Successfully fetched all the Decision Rules');
+        
+       
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        setErrorSB(true);
+        setTitle('Failed to load Decision Rules');
+        setContent('Sorry, due to server issue!');
+       
+    }
+  }else{
+    console.error('Error fetching data:');
+    setErrorSB(true);
+    setTitle('Please select valid package')
+  }
+  
+ 
+  
+setLoading(false)
+};
+
 const refreshRules = async() => {
-  await fetchLinearRule();
+  // await fetchLinearRule();
+  // await fetchDecisionRule();
+  await FetchAllRules();
 
 }
 
@@ -413,7 +508,10 @@ const renderErrorSB = (
 
     // setting current rule
     setCurrentRule(rowId);
-    await fetchLinearRule();
+    // await fetchLinearRule();
+    // await fetchDecisionRule();
+    await FetchAllRules();
+
     setLoading(true);
 
     await getOperator();
@@ -843,14 +941,18 @@ const renderErrorSB = (
           const response = await updateLinearRule(transformedData);
 
          console.log(response, 'succesfully updated Linear rule');
-         await fetchLinearRule();
+        //  await fetchLinearRule();
+        await FetchAllRules();
+
          setSuccessSB(true);
         setTitle('Successfully updated Rule');
          
 
         } catch (error) {
           console.error('Error updating the linear rule:', error);
-          await fetchLinearRule();
+          // await fetchLinearRule();
+          await FetchAllRules();
+
           setErrorSB(true);
         setTitle('Failed to update Rule');
         setContent('Sorry, due to technical issue!');
@@ -858,7 +960,29 @@ const renderErrorSB = (
 
     }
     if (DT) {
-      updateRule(currentrule, allData);
+      // updateRule(currentrule, allData);
+      const RuleDetails = tableData.find((row) => row.id === currentrule);
+      const inputName = RuleDetails ? RuleDetails.name: null;
+      const inputCategory = RuleDetails ? RuleDetails.category: null;
+      const inputDescription = RuleDetails ? RuleDetails.description: null;
+      
+      const transformedData = await transformDataDT(allData, selectedPackageId,inputName,currentrule,inputDescription, inputCategory );
+      try {
+
+        const response = await addDecisionRules(transformedData);
+        console.log(response, 'success updated DRule')
+        //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
+
+      } catch (error) {
+        console.log(error, 'failed to update DRule')
+        //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
+      }
+
+
 
     } 
 
@@ -930,13 +1054,69 @@ const renderErrorSB = (
               }
           }
       });
+
   });
 
 
     return transformedData;
 };
 
+const transformDataDT = async(originalData, packageid, decisionrulename,tableid,description,category) => {
+  const transformedData = {
+    packageid: packageid,
+    rule: [
+        {
+            decisionrulename: decisionrulename,
+            decisionruletableid: tableid,
+            decisionrule: []
+        }
+    ]
+};
 
+  // Iterate through originalData and add conditions and actions to transformedData
+  originalData.forEach((dataItem,index) => {
+    const conditionsDT = [];
+    const actionsDT = [];
+    Object.keys(dataItem).forEach(key => {
+      
+        if (key !== "id" && key !== "rulename" && key !== "description" && key !== "category") {
+            if (key === "Route to" || key === "Voicemail" || key === "Set Participant Data") {
+              const actData = actionTableData.find((row) => row.action === key);
+              const actId = actData ? actData.actionid : null;
+
+                actionsDT.push({
+                    actionname: key,
+                    actionvalue: dataItem[key],
+                    actionid: actId,
+                    actiontableid: actionTableId
+                });
+            } else {
+                conditionsDT.push({
+                    kvp: key,
+                    operator: dataItem[key].operator,
+                    value: dataItem[key].value,
+                    logical: "&&"
+                });
+            }
+        }
+    });
+    const decisionRule = {
+      id: dataItem.id,
+      description: description,
+      category: category,
+      order: String(index + 1), // Assuming order starts from 1
+      conditions: conditionsDT,
+      actions: actionsDT
+  };
+  
+  // Push the decision rule to the array in the output
+  transformedData.rule[0].decisionrule.push(decisionRule);
+
+});
+
+
+  return transformedData;
+};
 
 
 
@@ -965,13 +1145,17 @@ const renderErrorSB = (
           const response = await createLinearRule(transformedData);
 
          console.log(response, 'succesfully added Linear rule');
-         await fetchLinearRule();
+        //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
          setSuccessSB(true);
         setTitle('Successfully Added New Rule');
 
         } catch (error) {
           console.error('Error adding the linear rule:', error);
-          await fetchLinearRule();
+         //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
           setErrorSB(true);
           setTitle('Failed to add New Rule');
           setContent('Sorry, due to technical issue!');
@@ -983,6 +1167,49 @@ const renderErrorSB = (
         setTableData((prevData) => [...prevData, { id: rule_id, name: inputName, type: 'Decision Table', description: inputDescription, category: inputCategory }])
         const allData = getAllTableData();
         setFinalLR((prevData) => [...prevData, { LRId: rule_id, rule: allData }]);
+        console.log('DT alldata', allData);
+
+        const decisionTBid = String(Date.now());
+        
+        //originalData, packageid, decisionrulename,tableid,description,category
+        const transformedData = await transformDataDT(allData, selectedPackageId,inputName,decisionTBid,inputDescription, inputCategory );
+        console.log(transformedData, 'DT - transformed data');
+
+        
+        try{
+          const item = {
+            packageid:selectedPackageId,
+            decisiontablename:inputName,
+            decisiontableid: decisionTBid
+
+        }
+          const response = await createDecisionTable(item);
+          console.log(response,'success added DTable')
+
+
+          try{
+
+            const response = await addDecisionRules(transformedData);
+            console.log(response,'success added DRule')
+            //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
+
+          }catch(error){
+            console.log(error, 'failed to add DRule')
+            //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
+          }
+
+
+        }catch(error){
+          console.log(error, 'failed to add DTable')
+         //  await fetchLinearRule();
+        //  await fetchDecisionRule();
+        await FetchAllRules();
+        }
+
 
       }
 

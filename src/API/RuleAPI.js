@@ -30,3 +30,33 @@ export const updateLinearRule = async (data) => {
         throw error;
     }
 }
+
+export const createDecisionTable = async (data) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/adddecisiontable`, data);
+        return response.data;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const addDecisionRules = async (data) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/adddecisionrules`, data);
+        return response.data;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getDecisionRule= async (packageid) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/getdecisionrules/${packageid}`);
+        return response.data;
+
+    } catch (error) {
+        throw error;
+    }
+}

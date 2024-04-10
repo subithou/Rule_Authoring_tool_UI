@@ -35,7 +35,7 @@ const transformData = (originalData) => {
 
     // Iterate through originalData and add conditions and actions to transformedData
     Object.keys(originalData).forEach(key => {
-        if (key !== "id" && key !== "rulename" && key !== "description" && key !== "category" && key !== "Route to") {
+        if (key !== "id" && key !== "rulename" && key !== "description" && key !== "category") {
             if (key === "Set Participant Data" || key.startsWith("Route to")) {
                 transformedData.linearrule[0].actions.push({
                     actionname: key,

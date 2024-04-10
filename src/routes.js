@@ -6,6 +6,7 @@ import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Rules from "layouts/rules";
 import Packages from "layouts/packages";
+import Import from "layouts/import";
 
 import Decision from "layouts/rules/decision";
 import Profile from "layouts/profile";
@@ -15,6 +16,8 @@ import SignUp from "layouts/authentication/sign-up";
 import * as TbIcons from "react-icons/tb";
 import * as BsIcons from "react-icons/bs";
 import * as SiIcons from "react-icons/si";
+import { CiImport } from "react-icons/ci";
+
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -94,6 +97,14 @@ const routes = [
     icon: <BsIcons.BsFileEarmarkRuledFill/>,
     route: "/rules",
     component: <Rules />,
+  },
+  {
+    type: "collapse",
+    name: "Import",
+    key: "import",
+    icon: <CiImport />,
+    route: "/import",
+    component: <Import />,
   },
   
   {

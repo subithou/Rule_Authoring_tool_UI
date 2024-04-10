@@ -59,6 +59,7 @@ import { LuRefreshCw } from "react-icons/lu";
 import { createDecisionTable } from 'API/RuleAPI';
 import { addDecisionRules } from 'API/RuleAPI';
 import { getDecisionRule } from 'API/RuleAPI';
+import { SettingsSystemDaydreamSharp } from '@mui/icons-material';
 
 
 function Tables() {
@@ -93,9 +94,34 @@ function Tables() {
   const { selectedPackageId } = usePackage();
   console.log(selectedPackageId, 'inside rule');
   
+
+// for rollback confirmmation
+
+const [showRollbackConfirmation, setShowRollbackConfirmation] = useState(false);
+
+
   //if any change is happpen in package need to reload
   useEffect (() => {
+    setLinearRuleData([]);
+    setActionData([]);
+    setConditions([])
+    setConditionData({});
+    setLRCurrentVersion(false);
+
+    setShowLinearRule(false);
+
+    setLinearRuleData([]);
+    setInputName('');
+    setInputDescription('');
+    setInputCategory('');
+
+    setShowAddLinearName(false);
+    setLR(false);
+    setDT(false);
+
+
     FetchAllRules();
+    
   }, [selectedPackageId]);
 
 // loading the rules whne the page load and package change
@@ -110,6 +136,8 @@ const FetchAllRules = async () => {
   await fetchLinearRule();
   await fetchDecisionRule();
 }
+
+const [LRCurrentVersion, setLRCurrentVersion] = useState(false);
 
   const fetchLinearRule = async () => {
     setLoading(true);
@@ -139,6 +167,7 @@ const FetchAllRules = async () => {
   
           // Take the first element which will be the highest version
           const highestVersionData = rule.RuleData[0];
+
   
           // Transform the highest version data into the expected format
           const transformedRule = {
@@ -156,7 +185,8 @@ const FetchAllRules = async () => {
              name: rule.RuleName,
              type: 'Linear Rule',
              description: highestVersionData.RuleDescription,
-             category: highestVersionData.RuleCategory
+             category: highestVersionData.RuleCategory,
+             version: highestVersionData.Version
              }])
   
   
@@ -181,8 +211,8 @@ const FetchAllRules = async () => {
         });
   
         console.log(transformedData, "after fetching the get LR api");
-        setSuccessSB(true);
-        setTitle('Successfully fetched all the Rules');
+        // setSuccessSB(true);
+        // setTitle('Successfully fetched all the Rules');
           
          
       } catch (error) {
@@ -237,7 +267,8 @@ const transformOutput = (outputData) => {
     name: key.DecisionTableName,
     type: 'Decision Table',
     description: key.DecisionRule[0].RuleDescription,
-    category:  key.DecisionRule[0].RuleCategory
+    category:  key.DecisionRule[0].RuleCategory,
+    version: "1"
     }])
 
   }
@@ -264,8 +295,8 @@ const fetchDecisionRule = async () => {
 
 
       // console.log(transformedData, "after fetching the get LR api");
-      setSuccessSB(true);
-      setTitle('Successfully fetched all the Decision Rules');
+      // setSuccessSB(true);
+      // setTitle('Successfully fetched all the Decision Rules');
         
        
     } catch (error) {
@@ -500,11 +531,29 @@ const renderErrorSB = (
 
   // Example view function (replace with your actual view logic)
   async function handleView(rowId) {
+    
     setLoading(true);
+    // setLinearRuleData([]);
+    // setActionData([]);
+    // setConditions([])
+    // setConditionData({});
+    // setLRCurrentVersion(false);
     setLinearRuleData([]);
     setActionData([]);
     setConditions([])
     setConditionData({});
+    setLRCurrentVersion(false);
+
+    setShowLinearRule(false);
+
+    setLinearRuleData([]);
+    setInputName('');
+    setInputDescription('');
+    setInputCategory('');
+
+    setShowAddLinearName(false);
+    setLR(false);
+    setDT(false);
 
     // setting current rule
     setCurrentRule(rowId);
@@ -531,10 +580,16 @@ const renderErrorSB = (
     const RuleDataType = selectRuleData.type;
     if (RuleDataType == 'Linear Rule') {
       setLR(true)
+      if(parseInt(selectRuleData.version) > 1 ){
+        setLRCurrentVersion(true);
+      }
+
     }
     if (RuleDataType == 'Decision Table') {
       setDT(true)
     }
+
+    
 
 
     // Implement your view logic here, e.g., navigate to a detailed view
@@ -918,6 +973,143 @@ const renderErrorSB = (
       )))
   }
 
+  const [tempTableData, setTempTableData] = useState([]);
+
+  const goToPreviousLR = async() => {
+    setShowRollbackConfirmation(false);
+    setLoading(true);
+    setTempTableData([]);
+    try {
+
+      const response = await getLinearRule(selectedPackageId);
+
+      console.log(response, "successfully fetchedapi get linear rule ");
+      console.log(response.data, "fetched api get linear rule ");
+
+     
+      const responseData =response.data;
+      
+
+      // Initialize an empty array to store transformed data
+      const transformedData = [];
+      const basicData = [];
+
+      // Iterate over the response data
+      responseData.forEach(rule => {
+        // Sort RuleData array by Version in descending order
+        rule.RuleData.sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
+
+        // Take the first element which will be the highest version
+        const highestVersionData = rule.RuleData[1];
+
+
+        // Transform the highest version data into the expected format
+        const transformedRule = {
+          id: rule.RuleID,
+        };
+
+        // adding the main table values in TableData 
+          basicData.push({ 
+            id: rule.RuleID, 
+            name: rule.RuleName,
+            type: 'Linear Rule',
+            description: highestVersionData.RuleDescription,
+            category: highestVersionData.RuleCategory,
+            version: highestVersionData.Version
+            })
+
+           console.log(basicData, 'temp TABLEDATA');
+
+           console.log( rule.RuleID, rule.RuleName,highestVersionData.RuleDescription,highestVersionData.RuleCategory, highestVersionData.Version, 'basic rule details inside TempTableData')
+
+
+        highestVersionData.Conditions.forEach(condition => {
+          transformedRule[condition.KVP] = {
+            operator: condition.Operator,
+            value: condition.Value
+          };
+        });
+
+
+        highestVersionData.Actions.forEach(action => {
+          transformedRule[action.ActionName] = action.ActionValue;
+        });
+
+        // Add the transformed rule to the array
+        transformedData.push(transformedRule);
+        
+        //adding data to FinalLR array
+        // setFinalLR((prevData) => [...prevData, { LRId: rule.RuleID, rule: [transformedRule] }]);
+
+      });
+      const RuleDetails = basicData.find((row) => row.id === currentrule);
+      const inputName = RuleDetails ? RuleDetails.name: null;
+      const inputCategory = RuleDetails ? RuleDetails.category: null;
+      const inputDescription = RuleDetails ? RuleDetails.description: null;
+
+      console.log(inputName,inputCategory,inputDescription, "Rule basic info");
+
+      const transformedData1 = await transformDataUpdateLR(transformedData, selectedPackageId,currentrule,inputName, inputCategory,inputDescription );
+      console.log('Update LR api format', transformedData1);
+
+      try {
+        const response = await updateLinearRule(transformedData1);
+
+       console.log(response, 'succesfully updated Linear rule');
+
+      //  await fetchLinearRule();
+      await FetchAllRules();
+        setSuccessSB(true);
+        setTitle('Successfully Rolled back to previous version');
+        setLoading(true);
+
+      } catch (error) {
+        console.error('Error updating the linear rule:', error);
+        // await fetchLinearRule();
+        await FetchAllRules();
+
+        setErrorSB(true);
+        setTitle('Failed to update Rule');
+        setContent('Sorry, due to technical issue!');
+        setLoading(true);
+      }
+
+      
+        
+       
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        setErrorSB(true);
+        setTitle('Failed to load Linear Rules');
+        setContent('Sorry, due to server issue!');
+       
+    }
+
+        
+    setLoading(false);
+    setLinearRuleData([]);
+    setActionData([]);
+    setConditions([])
+    setConditionData({});
+    setLRCurrentVersion(false);
+
+    setShowLinearRule(false);
+
+    setLinearRuleData([]);
+    setInputName('');
+    setInputDescription('');
+    setInputCategory('');
+
+    setShowAddLinearName(false);
+    setLR(false);
+    setDT(false);
+    await FetchAllRules();
+
+    
+    
+  }
+
+
   const handleSaveView = async() => {
     setLoading(true);
     const allData = getAllTableData();
@@ -946,7 +1138,7 @@ const renderErrorSB = (
 
          setSuccessSB(true);
         setTitle('Successfully updated Rule');
-         
+        setLoading(true);
 
         } catch (error) {
           console.error('Error updating the linear rule:', error);
@@ -956,6 +1148,7 @@ const renderErrorSB = (
           setErrorSB(true);
         setTitle('Failed to update Rule');
         setContent('Sorry, due to technical issue!');
+        setLoading(true);
         }
 
     }
@@ -974,12 +1167,19 @@ const renderErrorSB = (
         //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
+        setSuccessSB(true);
+        setTitle('Successfully Updated Decision Table');
+        setLoading(true);
 
       } catch (error) {
         console.log(error, 'failed to update DRule')
         //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
+        setErrorSB(true);
+        setTitle('Failed to update Decision Table');
+        setContent('Sorry, due to technical issue!');
+        setLoading(true);
       }
 
 
@@ -1000,6 +1200,7 @@ const renderErrorSB = (
 
     setRuleName(''); // clearing current rule Name
     setCurrentRule('') // clearing current rule id
+    setLRCurrentVersion(false);
 
     setShowLinearRule(false);
     setLR(false);
@@ -1150,6 +1351,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
         await FetchAllRules();
          setSuccessSB(true);
         setTitle('Successfully Added New Rule');
+        setLoading(true);
 
         } catch (error) {
           console.error('Error adding the linear rule:', error);
@@ -1159,14 +1361,15 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
           setErrorSB(true);
           setTitle('Failed to add New Rule');
           setContent('Sorry, due to technical issue!');
+          setLoading(true);
          
         }
 
       }
       if (DT) {
-        setTableData((prevData) => [...prevData, { id: rule_id, name: inputName, type: 'Decision Table', description: inputDescription, category: inputCategory }])
+        // setTableData((prevData) => [...prevData, { id: rule_id, name: inputName, type: 'Decision Table', description: inputDescription, category: inputCategory, version:"1" }]);
         const allData = getAllTableData();
-        setFinalLR((prevData) => [...prevData, { LRId: rule_id, rule: allData }]);
+        // setFinalLR((prevData) => [...prevData, { LRId: rule_id, rule: allData }]);
         console.log('DT alldata', allData);
 
         const decisionTBid = String(Date.now());
@@ -1194,12 +1397,19 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
             //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
+        setSuccessSB(true);
+        setTitle('Successfully added new Decision Table');
+        setLoading(true);
 
           }catch(error){
             console.log(error, 'failed to add DRule')
             //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
+        setErrorSB(true);
+        setTitle('Failed to add NewDecision Table');
+        setContent('Sorry, due to technical issue!');
+        setLoading(true);
           }
 
 
@@ -1208,6 +1418,10 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
          //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
+        setErrorSB(true);
+        setTitle('Failed to add NewDecision Table');
+        setContent('Sorry, due to technical issue!');
+        setLoading(true);
         }
 
 
@@ -1255,7 +1469,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
     setLoading(false);
   }
 
-  const handleCancelLinearName = () => {
+  const handleCancelLinearName = async() => {
     setLinearRuleData([]);
     setActionData([]);
     setConditions([])
@@ -1267,17 +1481,30 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
     setShowAddLinearName(false);
     setLR(false);
     setDT(false);
+
+    await FetchAllRules();
   }
 
-  const handleCancel = () => {
+  const handleCancel = async() => {
     setLinearRuleData([]);
     setActionData([]);
     setConditions([])
     setConditionData({});
+    setLRCurrentVersion(false);
 
     setShowLinearRule(false);
+
+    setLinearRuleData([]);
+    setInputName('');
+    setInputDescription('');
+    setInputCategory('');
+
+    setShowAddLinearName(false);
     setLR(false);
     setDT(false);
+    await FetchAllRules();
+
+  
   }
 
 
@@ -1626,6 +1853,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                   { Header: "Name", accessor: "name", width: "15%" },
                   { Header: "Description", accessor: "description" },
                   { Header: "Category", accessor: "category" },
+                  // { Header: "Version", accessor: "version" },
                   { Header: "Type", accessor: "type" },
 
                   // **column for visibility and delete - deprecated the feature
@@ -1733,7 +1961,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                       {/* Add more actions as needed */}
                     </select>
                     &nbsp;&nbsp;&nbsp;
-                    <MDButton size="small" className="px-4" variant="outlined" color="info"
+                    <MDButton size="small" className="px-4 text-sm" variant="outlined" color="info"
                       onClick={addRowToDataTable1}
                       disabled={(linearRuleData.length === 1 && LR)}
                     >
@@ -1741,7 +1969,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                     </MDButton>
   
                     &nbsp;&nbsp;&nbsp;
-                    <MDBox display="flex" justifyContent="flex-end">
+                   
                       <MDButton size="small" variant="gradient" color="success"
                         onClick={handleSaveView}>
                         Save
@@ -1752,7 +1980,21 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                         onClick={handleCancel}>
                         Close
                       </MDButton>
-                    </MDBox>
+
+                      &nbsp;&nbsp;&nbsp;
+                     {LR && LRCurrentVersion ? (
+                       
+                          <MDButton size="small" variant="gradient" color="warning"
+                            onClick={() => setShowRollbackConfirmation(true)}>
+                            Rollback
+                          </MDButton>
+
+                       
+                       
+                     ): null}
+
+                    
+
                   </MDBox>
   
                   {/* logic for the add rules condition andactions */}
@@ -1762,13 +2004,6 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
   
                   {loading ? <Loading/> :(
                     <div>
-  
-  
-  
-  
-  
-  
-  
   
                     <DataTable1
                       table={{
@@ -1809,6 +2044,67 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                   </div>
                   )}
   
+
+
+                    {/* rollback confimation */}
+                    {showRollbackConfirmation ? (
+            <><div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
+            <form onSubmit={goToPreviousLR}>
+                <div
+                    className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
+                >
+                    <div className="relative w-auto my-6 mx-auto max-w-3xl">
+                        {/*content*/}
+                        <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                            {/*header*/}
+                            <div className="flex text-red-500 font-bold items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
+         
+
+              Rollback Linear Rule
+              
+
+
+                            </div>
+
+                            <div className="relative p-3 flex-auto">
+                                <p className="my-4 text-sm late-500 text-md leading-relaxed">
+                                    <div className="mt-2">
+                                      <p className="text-s ml-2 text-gray-500 text-justify whitespace-pre-line">
+                                        Are you sure want to Rollback the <b>{ruleName}</b> linear rule to previous version ? 
+                                        {/* All of your data <br/>will be permanently removed. This action cannot be undone. */}
+                                        
+                                      </p>
+                                    </div>
+                                
+                                </p>
+                            </div>
+
+                            {/*footer*/}
+                            <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
+                                <button
+                                    className="text-black-500 border rounded-lg font-semibold  px-4 py-2 text-sm  mr-1 mb-1 ease-linear"
+                                    type="button"
+                                    onClick={() => setShowRollbackConfirmation(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-red-500  text-sm  text-white font-semibold py-2 px-4 rounded-lg mx-2 flex items-center space-x-2"
+                                    type="submit"
+
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+            </form>
+            </div>
+        </>
+          ): null}
   
   
   

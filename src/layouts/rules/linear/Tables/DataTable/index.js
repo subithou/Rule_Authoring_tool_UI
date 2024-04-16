@@ -13,7 +13,7 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
@@ -163,6 +163,14 @@ function DataTable({
     entriesEnd = pageSize * (pageIndex + 1);
   }
 
+  const debouncedHandleActionDataChange = useCallback(
+    useAsyncDebounce((value, rowId, action) => {
+      onCellEdit(value, rowId, action);
+    }, 1000),
+    [onCellEdit]
+  );
+
+
   return (
     <TableContainer sx={{ boxShadow: "none" }}>
       {entriesPerPage || canSearch ? (
@@ -237,7 +245,8 @@ function DataTable({
                       <input
                         type="text"
                         value={cell.value}
-                        onChange={(e) => onCellEdit(row.original, cell.column.id, e.target.value)}
+                        // onChange={(e) => onCellEdit(row.original, cell.column.id, e.target.value)}
+                        onChange={(e) => debouncedHandleActionDataChange(e.target.value, row.original.id, cell.column.id)}
                         onBlur={handleCellBlur}
                       />
                     ) : (

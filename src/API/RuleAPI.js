@@ -14,7 +14,10 @@ export const createLinearRule = async (data) => {
 export const getLinearRule= async (packageid) => {
     try {
         const response = await axios.get(`${BASE_URL}/getrules/${packageid}`);
+        console.log(response, 'Response direct from API func');
+        console.log(response.data, 'Response.data direct from API func');
         return response.data;
+        
 
     } catch (error) {
         throw error;

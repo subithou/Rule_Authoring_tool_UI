@@ -52,6 +52,7 @@ import MDSnackbar from "components/MDSnackbar";
 import { createLinearRule } from 'API/RuleAPI';
 import { getLinearRule } from 'API/RuleAPI';
 import Loading from "components/Loading";
+import {LoadingTables} from  "components/LoadingTables";
 import { updateLinearRule } from 'API/RuleAPI';
 
 
@@ -88,6 +89,8 @@ function Tables() {
 
   
   const [loading, setLoading] = useState(false);
+
+  const [loadingUpdate, setLoadingUpdate] = useState(true);
 
 
   // for available packageid
@@ -162,11 +165,17 @@ const [LRCurrentVersion, setLRCurrentVersion] = useState(false);
   
         // Iterate over the response data
         responseData.forEach(rule => {
+          const x = rule.CurrentVersion;
+          const highest = rule.RuleData.find(item => item.Version === rule.CurrentVersion);
+          console.log(highest, 'Highest version dATa- djewndj - highest')
+
+
           // Sort RuleData array by Version in descending order
-          rule.RuleData.sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
+          // rule.RuleData.sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
   
           // Take the first element which will be the highest version
-          const highestVersionData = rule.RuleData[0];
+          const highestVersionData = highest;
+          console.log(highestVersionData, 'Highest version dATa- djewndj')
 
   
           // Transform the highest version data into the expected format
@@ -382,6 +391,7 @@ const renderErrorSB = (
   const newRuleRef = useRef(null);
 
   useEffect(() => {
+    
     if (showLinearRule && newRuleRef.current) {
       newRuleRef.current.focus();
     }
@@ -530,15 +540,23 @@ const renderErrorSB = (
   const [ruleName, setRuleName] = useState('');
 
   // Example view function (replace with your actual view logic)
-  async function handleView(rowId) {
+  const  handleView = async(rowId) => {
     
-    setLoading(true);
+    setLoadingUpdate(true);
+    console.log(loadingUpdate, 'Loading update value1')
     // setLinearRuleData([]);
     // setActionData([]);
     // setConditions([])
     // setConditionData({});
     // setLRCurrentVersion(false);
-    setLinearRuleData([]);
+    
+      setLinearRuleData([]);
+  
+      setShowAddLinearName(false);
+
+      setLR(false);
+      setDT(false);
+
     setActionData([]);
     setConditions([])
     setConditionData({});
@@ -559,16 +577,17 @@ const renderErrorSB = (
     setCurrentRule(rowId);
     // await fetchLinearRule();
     // await fetchDecisionRule();
-    await FetchAllRules();
+    // await FetchAllRules();
 
-    setLoading(true);
+    // setLoading(true);
 
     await getOperator();
     await getAttributes();
     await getActions();
 
     // load all the attributes and operators
-
+    setLoadingUpdate(true);
+    console.log(loadingUpdate, 'Loading update value2')
 
 
     console.log("View row with ID:", rowId);
@@ -601,7 +620,6 @@ const renderErrorSB = (
 
     rule_span.forEach(item => {
       // console.log(`ID: ${item.id}`);
-
 
       if (flag === 0) {
         Object.entries(item).forEach(([key, value]) => {
@@ -671,9 +689,10 @@ const renderErrorSB = (
 
     // setActionData((prevData) => [...prevData, '']);
     setLinearRuleData(selectRule.rule);
-    setLoading(false);
+    
     setShowLinearRule(true);
-
+    setLoadingUpdate(false);
+    console.log(loadingUpdate, 'Loading update value3')
   }
 
   // ...
@@ -852,7 +871,7 @@ const renderErrorSB = (
     }
   };
 
-  console.log(columns, linearRuleData, 'table data linear ')
+  // console.log(columns, linearRuleData, 'table data linear ')
   const handleActionDataChange = (value, rowId, action) => {
     // // Handle input change and update the data
     console.log('action data change', value, rowId, action)
@@ -981,79 +1000,18 @@ const renderErrorSB = (
     setTempTableData([]);
     try {
 
-      const response = await getLinearRule(selectedPackageId);
-
-      console.log(response, "successfully fetchedapi get linear rule ");
-      console.log(response.data, "fetched api get linear rule ");
-
-     
-      const responseData =response.data;
-      
-
-      // Initialize an empty array to store transformed data
-      const transformedData = [];
-      const basicData = [];
-
-      // Iterate over the response data
-      responseData.forEach(rule => {
-        // Sort RuleData array by Version in descending order
-        rule.RuleData.sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
-
-        // Take the first element which will be the highest version
-        const highestVersionData = rule.RuleData[1];
+      const RuleDetails = tableData.find((row) => row.id === currentrule);
+      const currentversion = RuleDetails ? RuleDetails.version: null;
+      const rollbackVersion = parseInt(currentversion)-1;
 
 
-        // Transform the highest version data into the expected format
-        const transformedRule = {
-          id: rule.RuleID,
-        };
+      const updateData = {
+        packageid: selectedPackageId,
+        ruleid: currentrule,
+        version: String(rollbackVersion)
+      }
 
-        // adding the main table values in TableData 
-          basicData.push({ 
-            id: rule.RuleID, 
-            name: rule.RuleName,
-            type: 'Linear Rule',
-            description: highestVersionData.RuleDescription,
-            category: highestVersionData.RuleCategory,
-            version: highestVersionData.Version
-            })
-
-           console.log(basicData, 'temp TABLEDATA');
-
-           console.log( rule.RuleID, rule.RuleName,highestVersionData.RuleDescription,highestVersionData.RuleCategory, highestVersionData.Version, 'basic rule details inside TempTableData')
-
-
-        highestVersionData.Conditions.forEach(condition => {
-          transformedRule[condition.KVP] = {
-            operator: condition.Operator,
-            value: condition.Value
-          };
-        });
-
-
-        highestVersionData.Actions.forEach(action => {
-          transformedRule[action.ActionName] = action.ActionValue;
-        });
-
-        // Add the transformed rule to the array
-        transformedData.push(transformedRule);
-        
-        //adding data to FinalLR array
-        // setFinalLR((prevData) => [...prevData, { LRId: rule.RuleID, rule: [transformedRule] }]);
-
-      });
-      const RuleDetails = basicData.find((row) => row.id === currentrule);
-      const inputName = RuleDetails ? RuleDetails.name: null;
-      const inputCategory = RuleDetails ? RuleDetails.category: null;
-      const inputDescription = RuleDetails ? RuleDetails.description: null;
-
-      console.log(inputName,inputCategory,inputDescription, "Rule basic info");
-
-      const transformedData1 = await transformDataUpdateLR(transformedData, selectedPackageId,currentrule,inputName, inputCategory,inputDescription );
-      console.log('Update LR api format', transformedData1);
-
-      try {
-        const response = await updateLinearRule(transformedData1);
+        const response = await updateLinearRule(updateData);
 
        console.log(response, 'succesfully updated Linear rule');
 
@@ -1063,16 +1021,121 @@ const renderErrorSB = (
         setTitle('Successfully Rolled back to previous version');
         setLoading(true);
 
-      } catch (error) {
-        console.error('Error updating the linear rule:', error);
-        // await fetchLinearRule();
-        await FetchAllRules();
+      // try {
+      //   const response = await updateLinearRule(transformedData1);
 
-        setErrorSB(true);
-        setTitle('Failed to update Rule');
-        setContent('Sorry, due to technical issue!');
-        setLoading(true);
-      }
+      //  console.log(response, 'succesfully updated Linear rule');
+
+      // //  await fetchLinearRule();
+      // await FetchAllRules();
+      //   setSuccessSB(true);
+      //   setTitle('Successfully Rolled back to previous version');
+      //   setLoading(true);
+
+      // } catch (error) {
+      //   console.error('Error updating the linear rule:', error);
+      //   // await fetchLinearRule();
+      //   await FetchAllRules();
+
+      //   setErrorSB(true);
+      //   setTitle('Failed to update Rule');
+      //   setContent('Sorry, due to technical issue!');
+      //   setLoading(true);
+      // }
+
+
+      // const response = await getLinearRule(selectedPackageId);
+
+      // console.log(response, "successfully fetchedapi get linear rule ");
+      // console.log(response.data, "fetched api get linear rule ");
+
+     
+      // const responseData =response.data;
+      
+
+      // // Initialize an empty array to store transformed data
+      // const transformedData = [];
+      // const basicData = [];
+
+      // // Iterate over the response data
+      // responseData.forEach(rule => {
+      //   // Sort RuleData array by Version in descending order
+      //   rule.RuleData.sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
+
+      //   // Take the first element which will be the highest version
+      //   const highestVersionData = rule.RuleData[1];
+
+
+      //   // Transform the highest version data into the expected format
+      //   const transformedRule = {
+      //     id: rule.RuleID,
+      //   };
+
+      //   // adding the main table values in TableData 
+      //     basicData.push({ 
+      //       id: rule.RuleID, 
+      //       name: rule.RuleName,
+      //       type: 'Linear Rule',
+      //       description: highestVersionData.RuleDescription,
+      //       category: highestVersionData.RuleCategory,
+      //       version: highestVersionData.Version
+      //       })
+
+      //      console.log(basicData, 'temp TABLEDATA');
+
+      //      console.log( rule.RuleID, rule.RuleName,highestVersionData.RuleDescription,highestVersionData.RuleCategory, highestVersionData.Version, 'basic rule details inside TempTableData')
+
+
+      //   highestVersionData.Conditions.forEach(condition => {
+      //     transformedRule[condition.KVP] = {
+      //       operator: condition.Operator,
+      //       value: condition.Value
+      //     };
+      //   });
+
+
+      //   highestVersionData.Actions.forEach(action => {
+      //     transformedRule[action.ActionName] = action.ActionValue;
+      //   });
+
+      //   // Add the transformed rule to the array
+      //   transformedData.push(transformedRule);
+        
+      //   //adding data to FinalLR array
+      //   // setFinalLR((prevData) => [...prevData, { LRId: rule.RuleID, rule: [transformedRule] }]);
+
+      // });
+      // const RuleDetails = basicData.find((row) => row.id === currentrule);
+      // const inputName = RuleDetails ? RuleDetails.name: null;
+      // const inputCategory = RuleDetails ? RuleDetails.category: null;
+      // const inputDescription = RuleDetails ? RuleDetails.description: null;
+
+      // console.log(inputName,inputCategory,inputDescription, "Rule basic info");
+
+      // const transformedData1 = await transformDataUpdateLR(transformedData, selectedPackageId,currentrule,inputName, inputCategory,inputDescription );
+      // console.log('Update LR api format', transformedData1);
+
+      // try {
+      //   const response = await updateLinearRule(transformedData1);
+
+      //  console.log(response, 'succesfully updated Linear rule');
+
+      // //  await fetchLinearRule();
+      // await FetchAllRules();
+      //   setSuccessSB(true);
+      //   setTitle('Successfully Rolled back to previous version');
+      //   setLoading(true);
+
+      // } catch (error) {
+      //   console.error('Error updating the linear rule:', error);
+      //   // await fetchLinearRule();
+      //   await FetchAllRules();
+
+      //   setErrorSB(true);
+      //   setTitle('Failed to update Rule');
+      //   setContent('Sorry, due to technical issue!');
+      //   setLoading(true);
+      // }
 
       
         
@@ -1080,7 +1143,7 @@ const renderErrorSB = (
     } catch (error) {
         console.error('Error fetching data:', error);
         setErrorSB(true);
-        setTitle('Failed to load Linear Rules');
+        setTitle('Failed to Rollback Linear Rules');
         setContent('Sorry, due to server issue!');
        
     }
@@ -1325,7 +1388,10 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
   // creating linear Name
   const addLinearName = async (event) => {
     event.preventDefault();
+    setShowAddLinearName(false);
     setLoading(true);
+    
+
     if (inputName && inputDescription && inputCategory && linearRuleData.length > 0) {
       const rule_id = String(Date.now())
       if (LR) {
@@ -1552,6 +1618,22 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
   // ...
 
   const showLinearNameFunction = async () => {
+  
+  
+      
+      setLR(false);
+      setDT(false);
+    setActionData([]);
+    setConditions([])
+    setConditionData({});
+    setLRCurrentVersion(false);
+    setShowLinearRule(false);
+    setLinearRuleData([]);
+    setInputName('');
+    setInputDescription('');
+    setInputCategory('');
+    setShowLinearRule(false);
+
     if (selectedPackageId != null) {
       setShowAddLinearName(true);
       setLR(true);
@@ -1567,6 +1649,19 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
   }
 
   const showDecisionNameFunction = async () => {
+    setLR(false);
+      setDT(false);
+    setActionData([]);
+    setConditions([])
+    setConditionData({});
+    setLRCurrentVersion(false);
+    setShowLinearRule(false);
+    setLinearRuleData([]);
+    setInputName('');
+    setInputDescription('');
+    setInputCategory('');
+    setShowLinearRule(false);
+
     if (selectedPackageId != null) {
       setShowAddLinearName(true);
       setDT(true);
@@ -1733,18 +1828,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                   </MDButton> */}
                 </MDBox>
                 &nbsp;&nbsp;
-                {/* <MDBox display="flex" justifyContent="flex-end">
-                  <MDButton size="small" variant="gradient" color="success"
-                    onClick={handleSave}>
-                    Save
-                  </MDButton>
-                  &nbsp;
-
-                  <MDButton size="small" variant="gradient" color="error"
-                    onClick={handleCancel}>
-                    Close
-                  </MDButton>
-                  </MDBox> */}
+              
               </MDBox>
 
               {/* logic for the add rules condition andactions */}
@@ -1794,27 +1878,9 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                             onChange={(e) => {
                               handleActionDataChange(e.target.value, row.original.id, action)
 
-                              // setValue(e.target.value)
-                              // // Handle input change and update the data
-                              //  // Update the state with the new array
-                              //  const newData = [...linearRuleData];
-                              // const rowIndex = linearRuleData.findIndex(
-                              //   (item) => item.id === row.original.id
-                              // );
-
-                              // newData[rowIndex] = {
-                              //   ...newData[rowIndex],
-                              //   [action]: value,
-                              // };
-
-                              // setLinearRuleData(newData);
                             }}
 
-                          // onBlur={
-                          //   {
-
-                          //   }
-                          // }
+                       
                           />
                         ),
                       })),
@@ -1877,32 +1943,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
 
 
 
-              {/* <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-              >
-                <MDTypography variant="h6" color="white">
-
-                  Rules
-                
-                 
-                </MDTypography>
-              </MDBox>
-              <MDBox pt={3}>
-                <DataTable
-                  table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
-              </MDBox> */}
+              
 
             </Card>
           </Grid>
@@ -2002,8 +2043,8 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
   
   
   
-                  {loading ? <Loading/> :(
-                    <div>
+                  {loadingUpdate ? <Loading/> :
+                    
   
                     <DataTable1
                       table={{
@@ -2041,8 +2082,8 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                     />
   
   
-                  </div>
-                  )}
+        
+                  }
   
 
 
@@ -2093,7 +2134,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                                     type="submit"
 
                                 >
-                                    Delete
+                                    Rollback
                                 </button>
                             </div>
                             

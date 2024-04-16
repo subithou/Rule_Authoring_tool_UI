@@ -279,7 +279,7 @@ const submitDeleteConfirmation = async() => {
               
       
               
-              {loading ? (<Loading/>): (
+              
                 <MDBox pt={6} pb={3}>
                 <Grid container spacing={6}>
                   <Grid item xs={12}>
@@ -357,7 +357,7 @@ const submitDeleteConfirmation = async() => {
               {renderSuccessSB}
                {renderErrorSB}
                       <MDBox pt={3}>
-
+                {loading ? (<Loading/>): (
                 <DataTable
                 table={{
                   columns: [
@@ -375,6 +375,7 @@ const submitDeleteConfirmation = async() => {
                   //   console.log("Row Clicked:", rowData);
                   // }}
                   />
+                   )}
                   </MDBox>
             </Card>
           </Grid>
@@ -465,7 +466,7 @@ const submitDeleteConfirmation = async() => {
           </Grid> */}
         </Grid>
       </MDBox>
-                  )}
+                 
               
       
     </DashboardLayout>

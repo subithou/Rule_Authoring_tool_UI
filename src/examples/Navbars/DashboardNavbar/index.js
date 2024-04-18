@@ -35,6 +35,7 @@ import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import { LuRefreshCw } from "react-icons/lu";
 
 
 
@@ -213,6 +214,7 @@ const fetchPackages = async () => {
 
             </MDBox> */}
           {route == 'packages' || route == 'import' ? null: (
+           <>
             <select className="mt-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-300 "
             labelId="demo-simple-select-label"
             id="demo-simple-select"
@@ -228,13 +230,16 @@ const fetchPackages = async () => {
               <option value={item.packageid}>{item.packagename}</option>
             ))}
           </select>
+                    &nbsp;&nbsp;
+                    <LuRefreshCw onClick={fetchPackages}/>
+                    </>
           )}
+
             
             <MDBox color={light ? "white" : "inherit"}>
 
             
 
-            &nbsp; 
            {/* <Link to='packages'>
            <MDButton size="small" variant="gradient" color="dark">
               Templates

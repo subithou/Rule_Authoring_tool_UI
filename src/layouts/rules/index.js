@@ -959,7 +959,11 @@ const renderErrorSB = (
     originalData.forEach(dataItem => {
       Object.keys(dataItem).forEach(key => {
           if (key !== "id" && key !== "rulename" && key !== "description" && key !== "category") {
-              if (key === "Route to" || key === "Voicemail" || key === "Set Participant Data") {
+              if (key === "Set Attribute" || key === "Route to Queue" || key === "Route to Voicemail"
+                || key === "Play Message" || key === "Route External" || key === "Routing Method - Preferred"
+              || key === "Routing Method - Predictive" || key === "Pause Recording" || key === "Set Priority"
+              || key === "Play holiday message" || key === "Play closure message" || key === "Play emergency message"
+            || key === "Set skill" || key ==="Screen pop enable" || key ==="Screen pop disable" ) {
                 const actData = actionTableData.find((row) => row.action === key);
                 const actId = actData ? actData.actionid : null;
 
@@ -998,6 +1002,7 @@ const renderErrorSB = (
     setShowRollbackConfirmation(false);
     setLoading(true);
     setTempTableData([]);
+    setShowLinearRule(false);
     try {
 
       const RuleDetails = tableData.find((row) => row.id === currentrule);
@@ -1174,6 +1179,7 @@ const renderErrorSB = (
 
 
   const handleSaveView = async() => {
+    setShowLinearRule(false);
     setLoading(true);
     const allData = getAllTableData();
 
@@ -1298,7 +1304,11 @@ const renderErrorSB = (
     originalData.forEach(dataItem => {
       Object.keys(dataItem).forEach(key => {
           if (key !== "id" && key !== "rulename" && key !== "description" && key !== "category") {
-              if (key === "Route to" || key === "Voicemail" || key === "Set Participant Data") {
+            if (key === "Set Attribute" || key === "Route to Queue" || key === "Route to Voicemail"
+            || key === "Play Message" || key === "Route External" || key === "Routing Method - Preferred"
+          || key === "Routing Method - Predictive" || key === "Pause Recording" || key === "Set Priority"
+          || key === "Play holiday message" || key === "Play closure message" || key === "Play emergency message"
+        || key === "Set skill" || key ==="Screen pop enable" || key ==="Screen pop disable" ){
                 const actData = actionTableData.find((row) => row.action === key);
                 const actId = actData ? actData.actionid : null;
 
@@ -1344,7 +1354,11 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
     Object.keys(dataItem).forEach(key => {
       
         if (key !== "id" && key !== "rulename" && key !== "description" && key !== "category") {
-            if (key === "Route to" || key === "Voicemail" || key === "Set Participant Data") {
+          if (key === "Set Attribute" || key === "Route to Queue" || key === "Route to Voicemail"
+          || key === "Play Message" || key === "Route External" || key === "Routing Method - Preferred"
+        || key === "Routing Method - Predictive" || key === "Pause Recording" || key === "Set Priority"
+        || key === "Play holiday message" || key === "Play closure message" || key === "Play emergency message"
+      || key === "Set skill" || key ==="Screen pop enable" || key ==="Screen pop disable" ) {
               const actData = actionTableData.find((row) => row.action === key);
               const actId = actData ? actData.actionid : null;
 
@@ -1699,7 +1713,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
       
       <MDButton size="small" variant="gradient" color="info"
         onClick={showLinearNameFunction}>
-        Add Linear Rule
+        Create Rule
       </MDButton>
       {/* </Link> */}
       &nbsp;&nbsp;&nbsp;
@@ -1707,7 +1721,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
      
       <MDButton  size="small" variant="gradient" color="info"
         onClick={showDecisionNameFunction}>
-        Add Decision Table
+        Create Rule Set
       </MDButton>
 
 

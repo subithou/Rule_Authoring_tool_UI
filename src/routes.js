@@ -24,7 +24,7 @@ import Icon from "@mui/material/Icon";
 const routes = [
   {
     type: "collapse",
-    name: "Packages",
+    name: "Rule Packages",
     key: "packages",
     icon: <TbIcons.TbPackages />,
     route: "/packages",

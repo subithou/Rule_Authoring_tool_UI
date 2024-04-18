@@ -170,12 +170,36 @@ function Dashboard() {
       value: ">"
     },
     {
-      name: "NOT EQUAL",
+      name: "Not Equal",
       value: "!="
     },
     {
-      name: "EQUAL",
+      name: "Equal",
       value: "="
+    },
+    {
+      name: "Greaterthan or equal",
+      value: ">="
+    },
+    {
+      name: "Lessthan or equal",
+      value: "<="
+    },
+    {
+      name: "Contains",
+      value: "Contains"
+    },
+    {
+      name: "Substring",
+      value: "Substring"
+    },
+    {
+      name: "Replace",
+      value: "Replace"
+    },
+    {
+      name: "Find",
+      value: "Find"
     }
   ]
 
@@ -590,17 +614,66 @@ const [showAddAction, setShowAddAction] = useState(false);
 
   const allActions = [
     {
-      name:"Set Participant Data",
-      value: "Set Participant Data"
+      name: "Set Attribute",
+      value: "Set Attribute"
     },
     {
-      name: "Route to",
-      value: "Route to"
+      name: "Route to Queue",
+      value: "Route to Queue"
     },
     {
-      name: "Voicemail",
-      value: "Voicemail"
+      name: "Route to Voicemail",
+      value: "Route to Voicemail"
     },
+    {
+      name: "Play Message",
+      value: "Play Message"
+    },
+    {
+      name: "Route External",
+      value: "Route External"
+    },
+    {
+      name: "Routing Method - Preferred",
+      value: "Routing Method - Preferred"
+    },
+    {
+      name: "Routing Method - Predictive",
+      value: "Routing Method - Predictive"
+    },
+    {
+      name: "Pause Recording",
+      value: "Pause Recording"
+    },
+    {
+      name: "Set Priority",
+      value: "Set Priority"
+    },
+    {
+      name: "Play holiday message",
+      value: "Play holiday message"
+    },
+    {
+      name: "Play closure message",
+      value: "Play closure message"
+    },
+    {
+      name: "Play emergency message",
+      value: "Play emergency message"
+    },
+    {
+      name: "Set skill",
+      value: "Set skill"
+    },
+    {
+      name: "Screen pop enable",
+      value: "Screen pop enable"
+    },
+    {
+      name: "Screen pop disable",
+      value: "Screen pop disable"
+    }
+     
     
   ]
 
@@ -724,12 +797,12 @@ const [showAddAction, setShowAddAction] = useState(false);
 
               <ComplexStatisticsCard
                 color="dark"
-                icon="equalizer"
+                icon="percent"
                 title={<MDButton size="small" variant="outlined" color="success" onClick={OpenOperator}>
                   {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
                   view
                 </MDButton>}
-                count={"Operators"}
+                count="Operators"
                 percentage={{
                   color: "success",
                   amount: "",
@@ -744,7 +817,7 @@ const [showAddAction, setShowAddAction] = useState(false);
           <Grid item xs={12} md={6} lg={4}>
             <MDBox mb={1}>
               <ComplexStatisticsCard
-                icon="leaderboard"
+                icon="dataset"
                 title={<MDButton size="small" variant="outlined" color="success" onClick={OpenAttributes}>
                   {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
                   view
@@ -777,7 +850,7 @@ const [showAddAction, setShowAddAction] = useState(false);
             <MDBox mb={1}>
               <ComplexStatisticsCard
                 color="success"
-                icon="store"
+                icon="rulefolder"
                 title={<MDButton size="small" variant="outlined" color="success" onClick={OpenActions}>
                   {/* <Icon sx={{ fontWeight: "bold" }}>open eye</Icon> */}
                   view

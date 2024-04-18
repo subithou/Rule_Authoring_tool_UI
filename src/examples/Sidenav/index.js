@@ -182,9 +182,12 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           variant="gradient"
           color={sidenavColor}
           fullWidth
-        > */}
+        >
           Cognizant
-        {/* </MDButton> */}
+        </MDButton> */}
+         <MDTypography component="h6" fontWeight="medium" >
+              Cognizant
+            </MDTypography>
       </MDBox>
     </SidenavRoot>
   );

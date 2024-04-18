@@ -117,24 +117,32 @@ const [validationMessageStatus, setvalidationMessageStatus] = useState(false)
 
 
   const [packageName, setPackageName] = useState('');
-  
+  const [warning, setWarning] = useState('');
+
   const handleChangePackageName = (event) =>{
-    setPackageName(event.target.value);
-    const newName = event.target.value;
+    if(event.target.value.includes(' ')){
+      setValidationMessage(<span className="text-sm text-red-500"><i class="bi bi-x"></i> Spaces are not allowed </span>);
+      // setvalidationMessageStatus(true)
 
-        // check the name already exist or not fro new creating name
+    }else{
+      setWarning('');
+      setPackageName(event.target.value);
+      const newName = event.target.value;
 
-        const x = allPackages.some((item) => item.packagename === newName);
-        if (x) {
-            // console.log('exist')
-            setValidationMessage(<span className="text-sm text-red-500"><i class="bi bi-x"></i> Already exist </span>)
-            setvalidationMessageStatus(true)
-        } else {
-            // console.log('notexist')
-            setValidationMessage(<span className="text-sm text-green-500"><i class='bi bi-check-lg'></i> Available</span>)
-            setvalidationMessageStatus(false)
+      // check the name already exist or not fro new creating name
 
-        }
+      const x = allPackages.some((item) => item.packagename === newName);
+      if (x) {
+        // console.log('exist')
+        setValidationMessage(<span className="text-sm text-red-500"><i class="bi bi-x"></i> Already exist </span>)
+        setvalidationMessageStatus(true)
+      } else {
+        // console.log('notexist')
+        setValidationMessage(<span className="text-sm text-green-500"><i class='bi bi-check-lg'></i> Available</span>)
+        setvalidationMessageStatus(false)
+
+      }
+    }
   }
 
   const [showCreatePackage, setShowCreatePackage] = useState(false);
@@ -174,6 +182,7 @@ const [validationMessageStatus, setvalidationMessageStatus] = useState(false)
     setValidationMessage('');
     setvalidationMessageStatus(false);
     setLoading(false);
+    setWarning('');
 
   }
 
@@ -182,6 +191,7 @@ const [validationMessageStatus, setvalidationMessageStatus] = useState(false)
     setPackageName('');
     setValidationMessage('');
     setvalidationMessageStatus(false);
+    setWarning('');
   }
 
 
@@ -327,7 +337,8 @@ const submitDeleteConfirmation = async() => {
                           px={2} >
                           <MDBox display="flex" justifyContent="space-between">
         
-                            <MDInput type="text"  className="mt-1 p-2 text-sm" label="Package Name" value={packageName} onChange={handleChangePackageName} />
+                            <MDInput type="text"  className="mt-1 p-2 text-sm" label="Package Name"  value={packageName} onChange={handleChangePackageName} />
+                            
                             
                             <MDBox display="flex" justifyContent="flex-end">
         
@@ -347,6 +358,8 @@ const submitDeleteConfirmation = async() => {
                             </MDBox>
                           </MDBox>
                           {validationMessage}
+                
+
         
                         </MDBox>
         

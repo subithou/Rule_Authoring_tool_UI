@@ -174,8 +174,8 @@ function Dashboard() {
       value: "!="
     },
     {
-      name: "Equal",
-      value: "="
+      name: "Equals",
+      value: "=="
     },
     {
       name: "Greaterthan or equal",
@@ -579,9 +579,9 @@ const [actionTableData, setActionTableData] = useState([]);
     setShowActions(true);
     setShowAttributes(false);
     setShowOverview(false);
-    setLoading(true);
+    
     try {
-
+      setLoading(true);
       const response = await getActionTable(String(selectedPackageId));
       console.log(response);
       if (response.data.length === 0) {
@@ -592,8 +592,8 @@ const [actionTableData, setActionTableData] = useState([]);
           console.log(response, 'successfully created actiontable');
           setSelectedActionTableID(actiontbID);
             setTimeout(() => {
-              OpenActions();
-            }, 3000)
+              setLoading(false);
+            }, 5000)
         }
         catch(error){
           console.log(error, 'getting error for creating action table if not there')
@@ -1241,9 +1241,9 @@ const processedAttributeTableData = attributesTableData.map(item => ({
                           value={selectedAttribute}
                           onChange={handleSelectedAttribute}>
                           <option value='' disabled>Select Type</option>
-                          <option value="INT">Number</option>
-                          <option value="STRING">String</option>
-                          <option value="BOOL">Boolean</option>                          
+                          <option value="Number">Number</option>
+                          <option value="String">String</option>
+                          <option value="Bool">Boolean</option>                          
                           <option value="Currency">Currency</option>
                           <option value="Date/Time">Date/Time</option>
                         </select>

@@ -150,6 +150,7 @@ const [validationMessageStatus, setvalidationMessageStatus] = useState(false)
   const [allPackages, setAllPackages] = useState([]);
 
   const submit = async() => {
+    setShowCreatePackage(false);
     setLoading(true);
 
     const id = String(Date.now());
@@ -178,7 +179,7 @@ const [validationMessageStatus, setvalidationMessageStatus] = useState(false)
 
     }
     setPackageName('');
-    setShowCreatePackage(false);
+    
     setValidationMessage('');
     setvalidationMessageStatus(false);
     setLoading(false);

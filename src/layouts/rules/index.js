@@ -192,7 +192,7 @@ const [LRCurrentVersion, setLRCurrentVersion] = useState(false);
           setTableData((prevData) => [...prevData, { 
              id: rule.RuleID, 
              name: rule.RuleName,
-             type: 'Linear Rule',
+             type: 'Rule',
              description: highestVersionData.RuleDescription,
              category: highestVersionData.RuleCategory,
              version: highestVersionData.Version
@@ -227,7 +227,7 @@ const [LRCurrentVersion, setLRCurrentVersion] = useState(false);
       } catch (error) {
           console.error('Error fetching data:', error);
           setErrorSB(true);
-          setTitle('Failed to load Linear Rules');
+          setTitle('Failed to load Rules');
           setContent('Sorry, due to server issue!');
          
       }
@@ -274,7 +274,7 @@ const transformOutput = (outputData) => {
   setTableData((prevData) => [...prevData, { 
     id: key.DecisionID, 
     name: key.DecisionTableName,
-    type: 'Decision Table',
+    type: 'Rule Set',
     description: key.DecisionRule[0].RuleDescription,
     category:  key.DecisionRule[0].RuleCategory,
     version: "1"
@@ -597,14 +597,14 @@ const renderErrorSB = (
     setRuleName(RuleDataName);
 
     const RuleDataType = selectRuleData.type;
-    if (RuleDataType == 'Linear Rule') {
+    if (RuleDataType == 'Rule') {
       setLR(true)
       if(parseInt(selectRuleData.version) > 1 ){
         setLRCurrentVersion(true);
       }
 
     }
-    if (RuleDataType == 'Decision Table') {
+    if (RuleDataType == 'Rule Set') {
       setDT(true)
     }
 
@@ -1018,7 +1018,7 @@ const renderErrorSB = (
 
         const response = await updateLinearRule(updateData);
 
-       console.log(response, 'succesfully updated Linear rule');
+       console.log(response, 'succesfully updated Rule');
 
       //  await fetchLinearRule();
       await FetchAllRules();
@@ -1148,7 +1148,7 @@ const renderErrorSB = (
     } catch (error) {
         console.error('Error fetching data:', error);
         setErrorSB(true);
-        setTitle('Failed to Rollback Linear Rules');
+        setTitle('Failed to Rollback Rule');
         setContent('Sorry, due to server issue!');
        
     }
@@ -1201,7 +1201,7 @@ const renderErrorSB = (
         try {
           const response = await updateLinearRule(transformedData);
 
-         console.log(response, 'succesfully updated Linear rule');
+         console.log(response, 'succesfully updated Rule');
         //  await fetchLinearRule();
         await FetchAllRules();
 
@@ -1210,7 +1210,7 @@ const renderErrorSB = (
         setLoading(true);
 
         } catch (error) {
-          console.error('Error updating the linear rule:', error);
+          console.error('Error updating the Rule:', error);
           // await fetchLinearRule();
           await FetchAllRules();
 
@@ -1237,7 +1237,7 @@ const renderErrorSB = (
         //  await fetchDecisionRule();
         await FetchAllRules();
         setSuccessSB(true);
-        setTitle('Successfully Updated Decision Table');
+        setTitle('Successfully Updated Rule Set');
         setLoading(true);
 
       } catch (error) {
@@ -1246,7 +1246,7 @@ const renderErrorSB = (
         //  await fetchDecisionRule();
         await FetchAllRules();
         setErrorSB(true);
-        setTitle('Failed to update Decision Table');
+        setTitle('Failed to update Rule Set');
         setContent('Sorry, due to technical issue!');
         setLoading(true);
       }
@@ -1425,7 +1425,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
         try {
           const response = await createLinearRule(transformedData);
 
-         console.log(response, 'succesfully added Linear rule');
+         console.log(response, 'succesfully added Rule');
         //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
@@ -1434,7 +1434,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
         setLoading(true);
 
         } catch (error) {
-          console.error('Error adding the linear rule:', error);
+          console.error('Error adding the Rule:', error);
          //  await fetchLinearRule();
         //  await fetchDecisionRule();
         await FetchAllRules();
@@ -1478,7 +1478,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
         //  await fetchDecisionRule();
         await FetchAllRules();
         setSuccessSB(true);
-        setTitle('Successfully added new Decision Table');
+        setTitle('Successfully added new Rule Set');
         setLoading(true);
 
           }catch(error){
@@ -1487,7 +1487,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
         //  await fetchDecisionRule();
         await FetchAllRules();
         setErrorSB(true);
-        setTitle('Failed to add NewDecision Table');
+        setTitle('Failed to add New Rule Set');
         setContent('Sorry, due to technical issue!');
         setLoading(true);
           }
@@ -1499,7 +1499,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
         //  await fetchDecisionRule();
         await FetchAllRules();
         setErrorSB(true);
-        setTitle('Failed to add NewDecision Table');
+        setTitle('Failed to add New Rule Set');
         setContent('Sorry, due to technical issue!');
         setLoading(true);
         }
@@ -2115,7 +2115,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                             <div className="flex text-red-500 font-bold items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
          
 
-              Rollback Linear Rule
+              Rollback Rule
               
 
 
@@ -2125,7 +2125,7 @@ const transformDataDT = async(originalData, packageid, decisionrulename,tableid,
                                 <p className="my-4 text-sm late-500 text-md leading-relaxed">
                                     <div className="mt-2">
                                       <p className="text-s ml-2 text-gray-500 text-justify whitespace-pre-line">
-                                        Are you sure want to Rollback the <b>{ruleName}</b> linear rule to previous version ? 
+                                        Are you sure want to Rollback the <b>{ruleName}</b> rule to previous version ? 
                                         {/* All of your data <br/>will be permanently removed. This action cannot be undone. */}
                                         
                                       </p>

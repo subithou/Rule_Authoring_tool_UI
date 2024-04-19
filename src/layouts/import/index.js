@@ -65,6 +65,7 @@ import BASE_URL from 'API/BASE_URL';
 
 
 function Tables() {
+  const [showRollbackConfirmation, setShowRollbackConfirmation] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [titleContent, setTitleContent] = useState('');
@@ -89,6 +90,7 @@ function Tables() {
     />
   );
   
+ 
   //error notification
   const [errorSB, setErrorSB] = useState(false);
   
@@ -102,7 +104,7 @@ function Tables() {
       color="error"
       icon="warning"
       title={titleContent}
-      content="Sorry due to server issue, getting failed"
+      content=""
       dateTime=""
       open={errorSB}
       onClose={closeErrorSB}
@@ -119,6 +121,7 @@ function Tables() {
   };
 
   const handleUpload = async () => {
+    setShowRollbackConfirmation(false);
     if (!file) {
       // alert('Please select a file to upload');
       setErrorSB(true);
@@ -134,7 +137,7 @@ function Tables() {
             'Content-Type': 'multipart/form-data'
           }
         });
-        setLoading(true)
+        setLoading(true);
   
         // File uploaded successfully, you can add your logic here
         // alert('File uploaded successfully!');
@@ -162,6 +165,22 @@ function Tables() {
     setFile(null);
   };
 
+  const openUploadConfirmation = () => {
+    
+    if (!file) {
+      // alert('Please select a file to upload');
+      setErrorSB(true);
+      setTitleContent('Please select a file to upload');
+      
+    }else{
+      setShowRollbackConfirmation(true);
+    }
+  }
+
+  const cancelUploadConfirmation = () => {
+    setShowRollbackConfirmation(false);
+   
+  }
 
 
   return (
@@ -191,8 +210,9 @@ function Tables() {
               </div>
 
               <div className="flex items-center justify-end">
-                <button onClick={handleUpload} type="button" className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <button onClick={openUploadConfirmation}  type="button" className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   Upload
+                  
                 </button>
               </div>
             </div>
@@ -202,7 +222,68 @@ function Tables() {
       )}
 
               
-      
+{showRollbackConfirmation ? (
+            <><div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
+            <form onSubmit={handleUpload}>
+                <div
+                    className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
+                >
+                    <div className="relative w-auto my-6 mx-auto max-w-3xl">
+                        {/*content*/}
+                        <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                            {/*header*/}
+                            <div className="flex text-red-500 font-bold items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
+         
+
+              Import the XML File
+              
+
+
+                            </div>
+
+                            <div className="relative p-3 flex-auto">
+                                <p className="my-4 text-sm late-500 text-md leading-relaxed">
+                                    <div className="mt-2">
+                                      <p className="text-s ml-2 text-gray-500 text-justify whitespace-pre-line">
+                                        Are you sure want to import the XML file ?    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><br/>
+                                        * Importing the XML file will take some time to process. <br/>
+                                        * Please do not refresh the page or close the browser. <br/>
+                                        * You will be notified once the process is completed. <br/>
+                                        
+                                        {/* All of your data <br/>will be permanently removed. This action cannot be undone. */}
+                                        
+                                      </p>
+                                    </div>
+                                
+                                </p>
+                            </div>
+
+                            {/*footer*/}
+                            <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
+                                <button
+                                    className="text-black-500 border rounded-lg font-semibold  px-4 py-2 text-sm  mr-1 mb-1 ease-linear"
+                                    type="button"
+                                    onClick={cancelUploadConfirmation}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-blue-500  text-sm  text-white font-semibold py-2 px-4 rounded-lg mx-2 flex items-center space-x-2"
+                                    type="submit"
+
+                                >
+                                    Import
+                                </button>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+            </form>
+            </div>
+        </>
+          ): null}
               
               
        

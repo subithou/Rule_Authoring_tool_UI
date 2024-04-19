@@ -401,8 +401,7 @@ const cancelDeleteConfirmationOperator = () => {
       }
     } else {
       setErrorSB(true);
-      setTitle('Please select package');
-      
+      setTitle('Please select package');      
     }
     setLoading(false);
 
@@ -444,13 +443,18 @@ const handleSelectedAttribute = (event) => {
   setSelectedAttribute(event.target.value);
 }
 
+// const addSpaceAfterComma = (str) => {
+//   return str.split(',').join(', ');
+// };
+
 const handleAddAttribute = async() => {
   setLoading(true);
   setShowAddAttributes(false);
 
   if(selectedAttribute, attributeName, attributeValue){
     try {
-      
+      // const processedArray = addSpaceAfterComma(attributeValue);
+
       const response = await createVariables({packageid:String(selectedPackageId), item: [{
         id: String(Date.now()),
         name: attributeName,
@@ -498,6 +502,12 @@ const handleCancelAddAttribute = async() => {
     setAttributeValue('');
     setSelectedAttribute('');
   
+}
+
+function ValuesCell({values}) {
+  // const valuesWithSpaces = row.values.join(' ');
+  console.log(values, 'row.values')
+  return <div>{values.join(' ')}</div>;
 }
 
 function DeleteColumnAttribute({ row }) {
@@ -581,6 +591,9 @@ const [actionTableData, setActionTableData] = useState([]);
           const response = await createActiontable({packageid:selectedPackageId ,actiontablename: "ActionTable", actiontableid:actiontbID })
           console.log(response, 'successfully created actiontable');
           setSelectedActionTableID(actiontbID);
+            setTimeout(() => {
+              OpenActions();
+            }, 3000)
         }
         catch(error){
           console.log(error, 'getting error for creating action table if not there')
@@ -785,6 +798,9 @@ const [showAddAction, setShowAddAction] = useState(false);
   }
 
   
+const processedAttributeTableData = attributesTableData.map(item => ({
+  ...item, values: item.values.join(' ')
+}));
 
   return (
     
@@ -1225,9 +1241,11 @@ const [showAddAction, setShowAddAction] = useState(false);
                           value={selectedAttribute}
                           onChange={handleSelectedAttribute}>
                           <option value='' disabled>Select Type</option>
-                          <option value="INT">Int</option>
-                          <option value="BOOL">Boolean</option>
+                          <option value="INT">Number</option>
                           <option value="STRING">String</option>
+                          <option value="BOOL">Boolean</option>                          
+                          <option value="Currency">Currency</option>
+                          <option value="Date/Time">Date/Time</option>
                         </select>
                         &nbsp;&nbsp;
                         <MDInput type="text" label="values" value={attributeValue} onChange={handleAttributeValue} />
@@ -1252,7 +1270,8 @@ const [showAddAction, setShowAddAction] = useState(false);
                         </MDBox>
                         
                       </MDBox>
-                      {validationMessage}
+                      {validationMessage} 
+                      
                     </MDBox>
 
 
@@ -1275,7 +1294,8 @@ const [showAddAction, setShowAddAction] = useState(false);
                         // { Header: "Actions", accessor: "actions", width: "25%", Cell: ActionsColumn },
                         // { Header: "age", accessor: "age", width: "12%" },
                       ],
-                      rows: attributesTableData
+                      // rows: attributesTableData
+                      rows: processedAttributeTableData
                     }}
 
                   // onRowClick={(rowData) => {

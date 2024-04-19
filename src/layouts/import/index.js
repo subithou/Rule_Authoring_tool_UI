@@ -197,12 +197,12 @@ function Tables() {
       {loading ? (<LoadingComponent/>) : (
         <div className="min-v-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Upload XML File</h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Upload Rule Package File</h2>
           <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="space-y-6">
               <div>
                 <label htmlFor="file" className="block text-sm font-medium text-gray-700">
-                  Select XML File
+                  Select File(XML)
                 </label>
                 <div className="mt-1 flex items-center">
                   <input id="file" name="file" type="file" className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" onChange={handleFileChange} />

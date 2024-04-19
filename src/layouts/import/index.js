@@ -54,6 +54,7 @@ import MDSnackbar from "components/MDSnackbar";
 
  //loading import
  import Loading from "components/Loading";
+ import LoadingComponent from "components/LoadingComponent";
 import TemplateDemo from "./TemplateDemo";
 import AdvanceDemo from "./AdvanceDemo";
 import axios from 'axios';
@@ -118,32 +119,46 @@ function Tables() {
   };
 
   const handleUpload = async () => {
-    setLoading(true)
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      await axios.post(`${BASE_URL}/uploadxml`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      // File uploaded successfully, you can add your logic here
-      // alert('File uploaded successfully!');
-      setTimeout(() => {
-        setSuccessSB(true);
-        setTitleContent('Successfully imported the file')
-      })
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      // Handle error
-      // alert('Error uploading file. Please try again.');
+    if (!file) {
+      // alert('Please select a file to upload');
       setErrorSB(true);
-      setTitleContent('Sorry, failed to import file')
-    }
+      setTitleContent('Please select a file to upload');
+      
+    }else{
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+  
+        await axios.post(`${BASE_URL}/uploadxml`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        setLoading(true)
+  
+        // File uploaded successfully, you can add your logic here
+        // alert('File uploaded successfully!');
+        
+  
+          setTimeout(() => {
+            setLoading(false);
+            console.log('20second after');
+            setSuccessSB(true);
+          setTitleContent('Successfully imported the file');
+          }, 20000);
+  
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Handle error
+        // alert('Error uploading file. Please try again.');
+        setErrorSB(true);
+        setTitleContent('Sorry, failed to import file')
+      }
 
-    setLoading(false);
+    }
+    
+
+    
     setFile(null);
   };
 
@@ -158,8 +173,9 @@ function Tables() {
       {/* <TemplateDemo/> */}
       {/* <AdvanceDemo/>
       </div> */}
-
-      {loading ? (<Loading/>) : (
+  {renderSuccessSB}
+               {renderErrorSB}
+      {loading ? (<LoadingComponent/>) : (
         <div className="min-v-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Upload XML File</h2>
